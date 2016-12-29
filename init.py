@@ -24,12 +24,23 @@ clock = pygame.time.Clock()
 game_folder = os.path.dirname(__file__)
 img_folder = os.path.join(game_folder, 'resources')
 
+def draw_shield_bar(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 10
+    fill = (pct / 100) * BAR_LENGTH
+    outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
+    pygame.draw.rect(surf, GREEN, fill_rect)
+    pygame.draw.rect(surf, WHITE, outline_rect, 2)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join(img_folder, 'playerShip1_orange.png')).convert()
         self.image.set_colorkey(BLACK)
+        self.shield = 100
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
@@ -115,6 +126,15 @@ while running:
     # Update
     all_sprites.update()
 
+    # check to see if a mob hit the player
+    hits = pygame.sprite.spritecollide(player, mobs, True)
+    if hits:
+        print("collision with mob!")
+        player.shield -= 20
+        if player.shield <= 0:
+            running = False
+        # running = False
+
     # check to see if a bullet hit a mob
     hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits:
@@ -125,6 +145,10 @@ while running:
     # Draw / render
     screen.fill(BLACK)
     all_sprites.draw(screen)
+
+    # for now each collision with mob takes 20 points from ship's shield
+    draw_shield_bar(screen, 5, 5, player.shield)
+
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
