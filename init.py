@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 
 WIDTH = 480
 HEIGHT = 600
@@ -19,11 +20,16 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
+# set up asset folders
+game_folder = os.path.dirname(__file__)
+img_folder = os.path.join(game_folder, 'resources')
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((50, 40))
-        self.image.fill(GREEN)
+        self.image = pygame.image.load(os.path.join(img_folder, 'playerShip1_orange.png')).convert()
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
