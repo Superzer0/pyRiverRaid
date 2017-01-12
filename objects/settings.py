@@ -1,6 +1,7 @@
-WIDTH = 360
-HEIGHT = 480
+WIDTH = 720
+HEIGHT = 960
 FPS = 60
+POWERUP_TIME = 5000
 
 # define colors
 WHITE = (255, 255, 255)
