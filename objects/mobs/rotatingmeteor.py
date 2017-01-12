@@ -1,24 +1,26 @@
-import pygame
 import random
+
+import pygame
 
 from objects.settings import *
 
 
-class Mob(pygame.sprite.Sprite):
-    def __init__(self, meteor_images):
+class RotatingMeteor(pygame.sprite.Sprite):
+    def __init__(self, meteor_images, start_x, start_y, speed_x, speed_y, rot_speed):
         pygame.sprite.Sprite.__init__(self)
         self.image_orig = random.choice(meteor_images)
         self.image_orig.set_colorkey(BLACK)
         self.image = self.image_orig.copy()
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width * .85 / 2)
-        # pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
-        self.rect.x = random.randrange(WIDTH - self.rect.width)
-        self.rect.y = random.randrange(-150, -100)
-        self.speedy = random.randrange(1, 8)
-        self.speedx = random.randrange(-3, 3)
+
+        self.rect.x = start_x - self.rect.x
+        self.rect.y = start_y
+        self.speedx = speed_x
+        self.speedy = speed_y
+
         self.rot = 0
-        self.rot_speed = random.randrange(-8, 8)
+        self.rot_speed = rot_speed
         self.last_update = pygame.time.get_ticks()
 
     def rotate(self):
@@ -36,8 +38,8 @@ class Mob(pygame.sprite.Sprite):
         self.rotate()
         self.rect.x += self.speedx
         self.rect.y += self.speedy
-        if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
-            self.rect.x = random.randrange(WIDTH - self.rect.width)
-            self.rect.y = random.randrange(-100, -40)
-            self.speedy = random.randrange(1, 8)
+        if self.is_on_the_border():
+            self.rect.y = random.randrange(-200, -80)
 
+    def is_on_the_border(self):
+        return self.rect.top > HEIGHT + 50 or self.rect.left < -50 or self.rect.right > WIDTH + 100

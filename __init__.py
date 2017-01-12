@@ -4,7 +4,8 @@ import random
 from os import path
 
 from objects.explosion import Explosion
-from objects.mob import Mob
+from objects.mobs.randommeteor import RandomMeteor
+from objects.mobs.rotatingmeteor import RotatingMeteor
 from objects.player import *
 from objects.powerup import Powerup
 from objects.settings import *
@@ -15,6 +16,7 @@ from objects.settings import *
 game_folder = path.join(os.path.dirname(__file__), 'resources')
 img_dir = path.join(game_folder, 'img')
 snd_dir = path.join(game_folder, 'snd')
+misc_dir = path.join(game_folder, 'misc')
 
 # initialize pygame and create window
 pygame.init()
@@ -36,12 +38,16 @@ player_img = pygame.image.load(path.join(img_dir, "playerShip2_blue.png")).conve
 player_power_up_img = pygame.image.load(path.join(img_dir, "playerShip3_blue.png")).convert()
 bullet_img = pygame.image.load(path.join(img_dir, "laserRed16.png")).convert()
 
-meteor_images = []
-meteor_list = ['meteorBrown_big1.png', 'meteorBrown_med1.png', 'meteorBrown_med1.png',
-               'meteorBrown_med3.png', 'meteorBrown_small1.png', 'meteorBrown_small2.png',
-               'meteorBrown_tiny1.png']
-for img in meteor_list:
-    meteor_images.append(pygame.image.load(path.join(img_dir, img)).convert())
+meteors_file_names_list = ['meteor_big1.png', 'meteor_big2.png', 'meteor_big3.png', 'meteor_big4.png',
+                           'meteor_med1.png',
+                           'meteor_med2.png', 'meteor_small1.png', 'meteor_small2.png',
+                           'meteor_tiny1.png', 'meteor_tiny2.png']
+
+meteor_mobs_images = [pygame.image.load(path.join(img_dir, 'meteors', 'brown', img)).convert() for img in
+                      meteors_file_names_list]
+
+meteor_obstacles_images = [pygame.image.load(path.join(img_dir, 'meteors', 'grey', img)).convert() for img in
+                           meteors_file_names_list]
 
 explosion_animations = {'lg': [], 'sm': [], 'player': []}
 
@@ -72,23 +78,39 @@ for i in range(9):
     img = load_explosions_animations(img_dir, 'sonicExplosion0{}.png')
     explosion_animations['player'].append(img)
 
-
 mobs = pygame.sprite.Group()
+obstacles = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 player = Player(player_img, player_power_up_img, bullet_img, shoot_sound, all_sprites, bullets)
 powerups = pygame.sprite.Group()
 all_sprites.add(player)
-font_name = pygame.font.match_font('arial')
+font_name = path.join(misc_dir, 'kenvector_future_thin.ttf')
 
 
 def new_mob():
-    m = Mob(meteor_images)
+    m = RandomMeteor(meteor_mobs_images)
     all_sprites.add(m)
     mobs.add(m)
 
 
-for i in range(20):
-    new_mob()
+def new_obstacle(i, start_x):
+    m = RotatingMeteor(meteor_obstacles_images, start_x,
+                       random.randrange(-300, (15 * i)), 0, random.randrange(1, 2), random.randrange(-2, 2))
+    all_sprites.add(m)
+    obstacles.add(m)
+
+
+# left obstacles
+for i in range(100):
+    new_obstacle(i, random.randrange(0, WIDTH_OBSTACLES - 50))
+
+# right obstacles
+for i in range(100):
+    new_obstacle(i, random.randrange(WIDTH - WIDTH_OBSTACLES - 50, WIDTH - 10))
+
+
+# for i in range(20):
+#     new_mob()
 
 
 def draw_text(surf, text, size, x, y):
@@ -145,6 +167,23 @@ game_over = False
 score = 0
 pygame.mixer.music.play(loops=-1)
 
+
+def player_collide(hit, new_object_fun):
+    is_terminal_hit = player.was_hit(hit.radius * 2)
+    new_object_fun()
+    player_explosion = Explosion(hit.rect.center, 'sm', explosion_animations)
+    random.choice(explosion_sounds).play()
+    all_sprites.add(player_explosion)
+    if is_terminal_hit:
+        player_die_sound.play()
+        death_explosion = Explosion(player.rect.center, 'player', explosion_animations)
+        all_sprites.add(death_explosion)
+        player.hide()
+        if not player.is_alive() and death_explosion.alive():
+            return True
+    return False
+
+
 while running:
     # keep loop running at the right speed
     clock.tick(FPS)
@@ -180,18 +219,11 @@ while running:
 
     hits = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
     for hit in hits:
-        is_terminal_hit = player.was_hit(hit.radius * 2)
-        new_mob()
-        player_explosion = Explosion(hit.rect.center, 'sm', explosion_animations)
-        random.choice(explosion_sounds).play()
-        all_sprites.add(player_explosion)
-        if is_terminal_hit:
-            player_die_sound.play()
-            death_explosion = Explosion(player.rect.center, 'player', explosion_animations)
-            all_sprites.add(death_explosion)
-            player.hide()
-            if not player.is_alive() and death_explosion.alive():
-                game_over = True
+        game_over = player_collide(hit, lambda: new_mob())
+
+    hits = pygame.sprite.spritecollide(player, obstacles, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        game_over = player_collide(hit, lambda: new_obstacle(1, hit.rect.x))
 
     hits = pygame.sprite.spritecollide(player, powerups, True)
     for hit in hits:

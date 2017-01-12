@@ -60,10 +60,10 @@ class Player(pygame.sprite.Sprite):
             self.shoot()
 
         self.rect.x += self.speedx
-        if self.rect.right > WIDTH:
-            self.rect.right = WIDTH
-        if self.rect.left < 0:
-            self.rect.left = 0
+        if self.rect.right > WIDTH - WIDTH_OBSTACLES:
+            self.rect.right = WIDTH - WIDTH_OBSTACLES
+        if self.rect.left < WIDTH_OBSTACLES:
+            self.rect.left = WIDTH_OBSTACLES
 
     def hide(self):
         self.hidden = True
@@ -76,6 +76,9 @@ class Player(pygame.sprite.Sprite):
         self.set_player_img(self.player_power_up_img, self.rect.centerx, self.rect.bottom)
 
     def shoot(self):
+        if self.hidden:
+            return
+
         now = pygame.time.get_ticks()
         if now - self.last_shot > Player.shoot_delay:
             self.last_shot = now
