@@ -3,11 +3,11 @@ import pygame
 
 
 class SoundResources:
-    SOUND_FOLDER_PREFIX = "snd"
+    __SOUND_FOLDER_PREFIX = "snd"
 
     def __init__(self, game_folder):
         self.__game_folder = game_folder
-        self.__snd_dir = path.join(self.__game_folder, SoundResources.SOUND_FOLDER_PREFIX)
+        self.__snd_dir = path.join(self.__game_folder, SoundResources.__SOUND_FOLDER_PREFIX)
         self.__shoot_sounds = [pygame.mixer.Sound(path.join(self.__snd_dir, snd)) for snd in
                                ['sfx_laser1.ogg', 'sfx_laser2.ogg']]
         self.__explosion_sounds = [pygame.mixer.Sound(path.join(self.__snd_dir, snd)) for snd in

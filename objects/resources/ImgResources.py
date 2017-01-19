@@ -17,8 +17,7 @@ class ImgResources:
         self.__game_folder = game_folder
         self.__img_dir = path.join(game_folder, ImgResources.__IMG_FOLDER_PREFIX)
         self.__bullet_img = pygame.image.load(path.join(self.__img_dir, "laserRed16.png")).convert()
-        self.__enemy_img = pygame.image.load(path.join(self.__img_dir, "playerShip1_orange.png")).convert()
-        self.__enemy_mini_img = pygame.transform.rotate(self.__enemy_img, 180)
+        self.__enemy_img = pygame.transform.rotate(pygame.image.load(path.join(self.__img_dir, "playerShip1_orange.png")).convert(), 180)
         self.__power_player_img = pygame.image.load(path.join(self.__img_dir, "playerShip3_blue.png")).convert()
         self.__player_img = pygame.image.load(path.join(self.__img_dir, "playerShip2_blue.png")).convert()
         self.__player_mini_img = pygame.transform.scale(self.__player_img, (25, 19))
@@ -48,10 +47,6 @@ class ImgResources:
     @property
     def enemy_img(self):
         return self.__enemy_img
-
-    @property
-    def enemy_mini_img(self):
-        return self.__enemy_mini_img
 
     @property
     def bullet_img(self):

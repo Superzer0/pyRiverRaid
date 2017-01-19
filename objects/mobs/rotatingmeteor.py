@@ -8,9 +8,9 @@ from objects.settings import *
 class RotatingMeteor(pygame.sprite.Sprite):
     def __init__(self, meteor_images, start_x, start_y, speed_x, speed_y, rot_speed):
         pygame.sprite.Sprite.__init__(self)
-        self.image_orig = random.choice(meteor_images)
-        self.image_orig.set_colorkey(BLACK)
-        self.image = self.image_orig.copy()
+        self.__image_orig = random.choice(meteor_images)
+        self.__image_orig.set_colorkey(BLACK)
+        self.image = self.__image_orig.copy()
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width * .85 / 2)
 
@@ -28,7 +28,7 @@ class RotatingMeteor(pygame.sprite.Sprite):
         if now - self.last_update > 50:
             self.last_update = now
             self.rot = (self.rot + self.rot_speed) % 360
-            new_image = pygame.transform.rotate(self.image_orig, self.rot)
+            new_image = pygame.transform.rotate(self.__image_orig, self.rot)
             old_center = self.rect.center
             self.image = new_image
             self.rect = self.image.get_rect()

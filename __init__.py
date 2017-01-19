@@ -7,8 +7,9 @@ from objects.explosion import Explosion
 from objects.mobs.randommeteor import RandomMeteor
 from objects.mobs.rotatingmeteor import RotatingMeteor
 from objects.player import *
-from objects.powerup import Powerup
+from objects.powerup import PowerUp
 from objects.resources.ImgResources import ImgResources
+from objects.resources.MiscResources import MiscResources
 from objects.resources.SoundResources import SoundResources
 from objects.settings import *
 
@@ -30,7 +31,7 @@ all_sprites = pygame.sprite.Group()
 soundResources = SoundResources(game_folder)
 soundResources.load_default_music()
 
-
+miscResources = MiscResources(game_folder)
 imgResources = ImgResources(game_folder)
 
 mobs = pygame.sprite.Group()
@@ -41,8 +42,6 @@ powerups = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 enemies_shots = pygame.sprite.Group()
 all_sprites.add(player)
-font_name = path.join(misc_dir, 'kenvector_future_thin.ttf')
-
 
 def new_mob():
     m = RandomMeteor(imgResources.meteor_mobs_img)
@@ -80,7 +79,7 @@ for i in range(5):
 
 
 def draw_text(surf, text, size, x, y):
-    font = pygame.font.Font(font_name, size)
+    font = miscResources.get_font(size)
     text_surface = font.render(text, True, WHITE)
     text_rect = text_surface.get_rect()
     text_rect.midtop = (x, y)
@@ -178,7 +177,7 @@ while running:
         expl = Explosion(hit.rect.center, imgResources.EXPLOSION_ANIMATIONS_LG, imgResources.explosion_animations)
         all_sprites.add(expl)
         if random.random() > 0.9:
-            pow = Powerup(hit.rect.center, imgResources.power_ups)
+            pow = PowerUp(hit.rect.center, imgResources.power_ups, random.choice([ImgResources.POWER_UP_GUN, ImgResources.POWER_UP_SHIELD]))
             all_sprites.add(pow)
             powerups.add(pow)
 
@@ -194,12 +193,7 @@ while running:
 
     hits = pygame.sprite.spritecollide(player, powerups, True)
     for hit in hits:
-        if hit.type == ImgResources.POWER_UP_SHIELD:
-            player.shield += random.randrange(10, 30)
-            if player.shield >= 100:
-                player.shield = 100
-        if hit.type == ImgResources.POWER_UP_GUN:
-            player.power_up()
+        player.power_up(hit.type)
 
     hits = pygame.sprite.groupcollide(powerups, bullets, True, True)
     for hit in hits:
