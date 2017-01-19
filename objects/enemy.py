@@ -10,14 +10,14 @@ from objects.settings import WIDTH
 class Enemy(pygame.sprite.Sprite):
     shoot_delay = 750
 
-    def __init__(self, all_sprites, enemies, enemies_shots, enemy_img, bullet_img):
+    def __init__(self, all_sprites, enemies, enemies_shots, imgResources):
         pygame.sprite.Sprite.__init__(self)
         self.all_sprites = all_sprites
         self.enemies = enemies
         self.enemies_shots = enemies_shots
-        self.image = enemy_img
+        self.image = imgResources.enemy_img
         self.image.set_colorkey(BLACK)
-        self.bullet_img = bullet_img
+        self.bullet_img = imgResources.bullet_img
         self.rect = self.image.get_rect()
         self.rect.bottom = random.randrange(0, 10)
         self.rect.centerx = random.randrange(150, WIDTH - 150)

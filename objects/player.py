@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 from objects.bullet import Bullet
@@ -9,15 +11,15 @@ class Player(pygame.sprite.Sprite):
     shoot_delay = 250
     max_hidden_time = 1000
 
-    def __init__(self, player_img, player_power_up_img, bullet_img, shoot_sound, all_sprites, bullets):
+    def __init__(self, imgResources, soundResources, all_sprites, bullets):
         pygame.sprite.Sprite.__init__(self)
-        self.player_power_up_img = player_power_up_img
-        self.player_org_img = player_img
+        self.player_power_up_img = imgResources.power_player_img
+        self.player_org_img = imgResources.player_img
         self.bullets = bullets
         self.all_sprites = all_sprites
-        self.shoot_sound = shoot_sound
-        self.bullet_img = bullet_img
-        self.set_player_img(player_img, WIDTH / 2, HEIGHT - 10)
+        self.soundResources = soundResources
+        self.bullet_img = imgResources.bullet_img
+        self.set_player_img(self.player_org_img, WIDTH / 2, HEIGHT - 10)
         self.speedx = 0
         self.lives = 3
         self.power = 1
@@ -86,7 +88,7 @@ class Player(pygame.sprite.Sprite):
                 bullet = Bullet(self.rect.centerx, self.rect.top, self.bullet_img)
                 self.all_sprites.add(bullet)
                 self.bullets.add(bullet)
-                self.shoot_sound.play()
+                random.choice(self.soundResources.shoot_sounds).play()
             if self.power >= 2:
                 bullet1 = Bullet(self.rect.left, self.rect.centery, self.bullet_img)
                 bullet2 = Bullet(self.rect.right, self.rect.centery, self.bullet_img)
@@ -94,7 +96,7 @@ class Player(pygame.sprite.Sprite):
                 self.all_sprites.add(bullet2)
                 self.bullets.add(bullet1)
                 self.bullets.add(bullet2)
-                self.shoot_sound.play()
+                random.choice(self.soundResources.shoot_sounds).play()
 
     def was_hit(self, impact):
         """

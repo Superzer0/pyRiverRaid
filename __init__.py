@@ -1,21 +1,21 @@
 # Pygame template - skeleton for a new pygame project
 import os
-import random
+from os import path
+
 from objects.enemy import Enemy
 from objects.explosion import Explosion
 from objects.mobs.randommeteor import RandomMeteor
 from objects.mobs.rotatingmeteor import RotatingMeteor
 from objects.player import *
 from objects.powerup import Powerup
+from objects.resources.ImgResources import ImgResources
+from objects.resources.SoundResources import SoundResources
 from objects.settings import *
-from os import path
 
 # set up asset folders
 
 
 game_folder = path.join(os.path.dirname(__file__), 'resources')
-img_dir = path.join(game_folder, 'img')
-snd_dir = path.join(game_folder, 'snd')
 misc_dir = path.join(game_folder, 'misc')
 
 # initialize pygame and create window
@@ -23,67 +23,20 @@ pygame.init()
 pygame.mixer.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("New River Raid")
+pygame.display.set_caption("Space Raid")
 clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
-shoot_sound = pygame.mixer.Sound(path.join(snd_dir, random.choice(['sfx_laser1.ogg', 'sfx_laser2.ogg'])))
-explosion_sounds = [pygame.mixer.Sound(path.join(snd_dir, snd)) for snd in ['expl3.wav', 'expl6.wav']]
-player_die_sound = pygame.mixer.Sound(path.join(snd_dir, 'rumble1.ogg'))
-pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
-pygame.mixer.music.set_volume(0.4)
 
-background = pygame.image.load(path.join(img_dir, 'starfield.png')).convert()
-background_rect = background.get_rect()
-player_img = pygame.image.load(path.join(img_dir, "playerShip2_blue.png")).convert()
-enemy_img = pygame.image.load(path.join(img_dir, "playerShip1_orange.png")).convert()
-enemy_mini_img = pygame.transform.rotate(enemy_img, 180)
-player_power_up_img = pygame.image.load(path.join(img_dir, "playerShip3_blue.png")).convert()
-bullet_img = pygame.image.load(path.join(img_dir, "laserRed16.png")).convert()
-
-meteors_file_names_list = ['meteor_big1.png', 'meteor_big2.png', 'meteor_big3.png', 'meteor_big4.png',
-                           'meteor_med1.png',
-                           'meteor_med2.png', 'meteor_small1.png', 'meteor_small2.png',
-                           'meteor_tiny1.png', 'meteor_tiny2.png']
-
-meteor_mobs_images = [pygame.image.load(path.join(img_dir, 'meteors', 'brown', img)).convert() for img in
-                      meteors_file_names_list]
-
-meteor_obstacles_images = [pygame.image.load(path.join(img_dir, 'meteors', 'grey', img)).convert() for img in
-                           meteors_file_names_list]
-
-explosion_animations = {'lg': [], 'sm': [], 'player': []}
-
-player_mini_img = pygame.transform.scale(player_img, (25, 19))
-player_mini_img.set_colorkey(BLACK)
-
-power_up_images = {'shield': pygame.image.load(path.join(img_dir, 'powerups', 'shield_gold.png')).convert(),
-                   'gun': pygame.image.load(path.join(img_dir, 'powerups', 'bolt_gold.png')).convert()}
+soundResources = SoundResources(game_folder)
+soundResources.load_default_music()
 
 
-def load_explosions_animations(image_directory, filename_prefix):
-    img_filename = filename_prefix.format(i)
-    explosion_image = pygame.image.load(path.join(image_directory, 'Explosions_kenney', img_filename)).convert()
-    explosion_image.set_colorkey(BLACK)
-    return explosion_image
-
-
-for i in range(9):
-    # regular explosion
-    img = load_explosions_animations(img_dir, 'regularExplosion0{}.png')
-
-    img_lg = pygame.transform.scale(img, (75, 75))
-    explosion_animations['lg'].append(img_lg)
-    img_sm = pygame.transform.scale(img, (32, 32))
-    explosion_animations['sm'].append(img_sm)
-
-    # player explosion
-    img = load_explosions_animations(img_dir, 'sonicExplosion0{}.png')
-    explosion_animations['player'].append(img)
+imgResources = ImgResources(game_folder)
 
 mobs = pygame.sprite.Group()
 obstacles = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
-player = Player(player_img, player_power_up_img, bullet_img, shoot_sound, all_sprites, bullets)
+player = Player(imgResources, soundResources, all_sprites, bullets)
 powerups = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 enemies_shots = pygame.sprite.Group()
@@ -92,20 +45,20 @@ font_name = path.join(misc_dir, 'kenvector_future_thin.ttf')
 
 
 def new_mob():
-    m = RandomMeteor(meteor_mobs_images)
+    m = RandomMeteor(imgResources.meteor_mobs_img)
     all_sprites.add(m)
     mobs.add(m)
 
 
 def new_obstacle(i, start_x):
-    m = RotatingMeteor(meteor_obstacles_images, start_x,
+    m = RotatingMeteor(imgResources.meteor_obstacles_img, start_x,
                        random.randrange(-300, (15 * i)), 0, random.randrange(1, 2), random.randrange(-2, 2))
     all_sprites.add(m)
     obstacles.add(m)
 
 
 def new_enemy():
-    enemy = Enemy(all_sprites, enemies, enemies_shots, enemy_mini_img, bullet_img)
+    enemy = Enemy(all_sprites, enemies, enemies_shots, imgResources)
     enemies.add(enemy)
     all_sprites.add(enemy)
 
@@ -119,8 +72,8 @@ for i in range(100):
     new_obstacle(i, random.randrange(WIDTH - WIDTH_OBSTACLES - 50, WIDTH - 10))
 
 
-# for i in range(20):
-#     new_mob()
+for i in range(20):
+    new_mob()
 
 for i in range(5):
     new_enemy()
@@ -155,8 +108,8 @@ def draw_shield_bar(surf, x, y, pct):
     pygame.draw.rect(surf, WHITE, outline_rect, 2)
 
 
-def show_go_screen():
-    screen.blit(background, background_rect)
+def show_go_screen(imgResources):
+    screen.blit(imgResources.background, imgResources.background.get_rect())
     draw_text(screen, "Space river raid", 64, WIDTH / 2, HEIGHT / 4)
     draw_text(screen, "Arrow keys move, Space to fire", 22,
               WIDTH / 2, HEIGHT / 2)
@@ -172,7 +125,7 @@ def show_go_screen():
                 waiting = False
 
 
-show_go_screen()
+show_go_screen(imgResources)
 
 # Game loop
 running = True
@@ -184,12 +137,12 @@ pygame.mixer.music.play(loops=-1)
 def player_collide(hit, new_object_fun):
     is_terminal_hit = player.was_hit(hit.radius * 2)
     new_object_fun()
-    player_explosion = Explosion(hit.rect.center, 'sm', explosion_animations)
-    random.choice(explosion_sounds).play()
+    player_explosion = Explosion(hit.rect.center, ImgResources.EXPLOSION_ANIMATIONS_SM, imgResources.explosion_animations)
+    random.choice(soundResources.explosion_sounds).play()
     all_sprites.add(player_explosion)
     if is_terminal_hit:
-        player_die_sound.play()
-        death_explosion = Explosion(player.rect.center, 'player', explosion_animations)
+        soundResources.player_die_sound.play()
+        death_explosion = Explosion(player.rect.center, ImgResources.EXPLOSION_ANIMATIONS_PLAYER, imgResources.explosion_animations)
         all_sprites.add(death_explosion)
         player.hide()
         if not player.is_alive() and death_explosion.alive():
@@ -220,12 +173,12 @@ while running:
 
     hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits:
-        random.choice(explosion_sounds).play()
+        random.choice(soundResources.explosion_sounds).play()
         score += 50 - hit.radius
-        expl = Explosion(hit.rect.center, 'lg', explosion_animations)
+        expl = Explosion(hit.rect.center, imgResources.EXPLOSION_ANIMATIONS_LG, imgResources.explosion_animations)
         all_sprites.add(expl)
         if random.random() > 0.9:
-            pow = Powerup(hit.rect.center, power_up_images)
+            pow = Powerup(hit.rect.center, imgResources.power_ups)
             all_sprites.add(pow)
             powerups.add(pow)
 
@@ -241,17 +194,17 @@ while running:
 
     hits = pygame.sprite.spritecollide(player, powerups, True)
     for hit in hits:
-        if hit.type == 'shield':
+        if hit.type == ImgResources.POWER_UP_SHIELD:
             player.shield += random.randrange(10, 30)
             if player.shield >= 100:
                 player.shield = 100
-        if hit.type == 'gun':
+        if hit.type == ImgResources.POWER_UP_GUN:
             player.power_up()
 
     hits = pygame.sprite.groupcollide(powerups, bullets, True, True)
     for hit in hits:
-        random.choice(explosion_sounds).play()
-        expl = Explosion(hit.rect.center, 'sm', explosion_animations)
+        random.choice(soundResources.explosion_sounds).play()
+        expl = Explosion(hit.rect.center, imgResources.EXPLOSION_ANIMATIONS_SM, imgResources.explosion_animations)
         all_sprites.add(expl)
 
     # check to see if a enemy hit the player
@@ -269,7 +222,7 @@ while running:
     # check to see if a player's shot hit the enemy
     hits = pygame.sprite.groupcollide(enemies, bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
-        death_explosion = Explosion(hit.rect.center, 'player', explosion_animations)
+        death_explosion = Explosion(hit.rect.center, imgResources.EXPLOSION_ANIMATIONS_PLAYER, imgResources.explosion_animations)
         all_sprites.add(death_explosion)
         hit.kill()
         if len(enemies.sprites()) <= MAX_ENEMIES:
@@ -277,11 +230,11 @@ while running:
 
     # Draw / render
     screen.fill(BLACK)
-    screen.blit(background, background_rect)
+    screen.blit(imgResources.background, imgResources.background.get_rect())
     all_sprites.draw(screen)
     draw_text(screen, str(score), 30, WIDTH // 2, 20)
     draw_shield_bar(screen, 7, 7, player.shield)
-    draw_lives(screen, WIDTH - 100, 5, player.lives, player_mini_img)
+    draw_lives(screen, WIDTH - 100, 5, player.lives, imgResources.player_mini_img)
 
     if game_over:
         draw_text(screen, "Game over", 50, WIDTH // 2, HEIGHT // 2 - 70)
