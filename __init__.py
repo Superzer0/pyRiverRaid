@@ -1,14 +1,14 @@
 # Pygame template - skeleton for a new pygame project
 import os
 import random
-from os import path
-
+from objects.enemy import Enemy
 from objects.explosion import Explosion
 from objects.mobs.randommeteor import RandomMeteor
 from objects.mobs.rotatingmeteor import RotatingMeteor
 from objects.player import *
 from objects.powerup import Powerup
 from objects.settings import *
+from os import path
 
 # set up asset folders
 
@@ -35,6 +35,8 @@ pygame.mixer.music.set_volume(0.4)
 background = pygame.image.load(path.join(img_dir, 'starfield.png')).convert()
 background_rect = background.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip2_blue.png")).convert()
+enemy_img = pygame.image.load(path.join(img_dir, "playerShip1_orange.png")).convert()
+enemy_mini_img = pygame.transform.rotate(enemy_img, 180)
 player_power_up_img = pygame.image.load(path.join(img_dir, "playerShip3_blue.png")).convert()
 bullet_img = pygame.image.load(path.join(img_dir, "laserRed16.png")).convert()
 
@@ -83,6 +85,8 @@ obstacles = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 player = Player(player_img, player_power_up_img, bullet_img, shoot_sound, all_sprites, bullets)
 powerups = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
+enemies_shots = pygame.sprite.Group()
 all_sprites.add(player)
 font_name = path.join(misc_dir, 'kenvector_future_thin.ttf')
 
@@ -100,6 +104,12 @@ def new_obstacle(i, start_x):
     obstacles.add(m)
 
 
+def new_enemy():
+    enemy = Enemy(all_sprites, enemies, enemies_shots, enemy_mini_img, bullet_img)
+    enemies.add(enemy)
+    all_sprites.add(enemy)
+
+
 # left obstacles
 for i in range(100):
     new_obstacle(i, random.randrange(0, WIDTH_OBSTACLES - 50))
@@ -111,6 +121,9 @@ for i in range(100):
 
 # for i in range(20):
 #     new_mob()
+
+for i in range(5):
+    new_enemy()
 
 
 def draw_text(surf, text, size, x, y):
@@ -199,6 +212,7 @@ while running:
 
     if game_over:
         mobs.empty()
+        enemies.empty()
         all_sprites.empty()
 
     # Update
@@ -239,6 +253,27 @@ while running:
         random.choice(explosion_sounds).play()
         expl = Explosion(hit.rect.center, 'sm', explosion_animations)
         all_sprites.add(expl)
+
+    # check to see if a enemy hit the player
+    hits = pygame.sprite.spritecollide(player, enemies, True)
+    if hits:
+        hit = hits[0]
+        game_over = player_collide(hit, lambda: new_obstacle(1, hit.rect.x))
+        new_enemy()
+
+    # check to see if a enemy's shot hit the player
+    hits = pygame.sprite.spritecollide(player, enemies_shots, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        game_over = player_collide(hit, lambda: new_enemy())
+
+    # check to see if a player's shot hit the enemy
+    hits = pygame.sprite.groupcollide(enemies, bullets, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        death_explosion = Explosion(hit.rect.center, 'player', explosion_animations)
+        all_sprites.add(death_explosion)
+        hit.kill()
+        if len(enemies.sprites()) <= MAX_ENEMIES:
+            new_enemy()
 
     # Draw / render
     screen.fill(BLACK)
