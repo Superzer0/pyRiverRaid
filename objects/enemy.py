@@ -10,7 +10,7 @@ from objects.settings import WIDTH
 class Enemy(pygame.sprite.Sprite):
     shoot_delay = 750
 
-    def __init__(self, all_sprites, enemies, enemies_shots, enemy_img, bullet_img):
+    def __init__(self, all_sprites, enemies, enemies_shots, enemy_img, bullet_img, context):
         pygame.sprite.Sprite.__init__(self)
         self.all_sprites = all_sprites
         self.enemies = enemies
@@ -26,12 +26,13 @@ class Enemy(pygame.sprite.Sprite):
         self.last_shot = pygame.time.get_ticks()
         self.hidden_time = pygame.time.get_ticks()
         self.power_time = pygame.time.get_ticks()
+        self.context = context
 
     def shot(self):
         now = pygame.time.get_ticks()
         if now - self.last_shot > Enemy.shoot_delay:
             self.last_shot = now
-            bullet = Bullet(self.rect.centerx, self.rect.bottom, self.bullet_img)
+            bullet = Bullet(self.rect.centerx, self.rect.bottom, self.bullet_img, self.context)
             bullet.speedy = 15
             self.all_sprites.add(bullet)
             self.enemies_shots.add(bullet)
