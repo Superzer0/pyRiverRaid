@@ -1,7 +1,5 @@
-import random
-
 import pygame
-
+import random
 from objects.bullet import Bullet
 from objects.resources.ImgResources import ImgResources
 from objects.settings import *
@@ -9,6 +7,7 @@ from objects.settings import *
 
 class Player(pygame.sprite.Sprite):
     shield_max_value = 100
+    fuel_max_value = 100
     shoot_delay = 250
     max_hidden_time = 1000
 
@@ -26,6 +25,7 @@ class Player(pygame.sprite.Sprite):
         self.__power = 1
         self.__hidden = False
         self.__shield = Player.shield_max_value
+        self.__fuel = Player.fuel_max_value
         self.__last_shot = pygame.time.get_ticks()
         self.__hidden_time = pygame.time.get_ticks()
         self.__power_time = pygame.time.get_ticks()
@@ -44,12 +44,28 @@ class Player(pygame.sprite.Sprite):
         return self.__shield
 
     @property
+    def fuel(self):
+        return self.__fuel
+
+    @property
     def lives(self):
         return self.__lives
 
     @property
     def power(self):
         return self.__power
+
+    @lives.setter
+    def lives(self, value):
+        self.__lives = value
+
+    @shield.setter
+    def shield(self, value):
+        self.shield = value
+
+    @fuel.setter
+    def fuel(self, value):
+        self.fuel = value
 
     def update(self, *args):
 
@@ -79,6 +95,9 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = WIDTH - WIDTH_OBSTACLES
         if self.rect.left < WIDTH_OBSTACLES:
             self.rect.left = WIDTH_OBSTACLES
+
+        if not self.__hidden:
+            self.__fuel -= 0.5
 
     def hide(self):
         self.__hidden = True
@@ -136,3 +155,9 @@ class Player(pygame.sprite.Sprite):
             return False
         else:
             return True
+
+    def recharge_fuel(self):
+        self.__fuel = Player.fuel_max_value
+
+    def recover(self):
+        self.__shield = Player.shield_max_value

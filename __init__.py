@@ -1,7 +1,5 @@
 # Pygame template - skeleton for a new pygame project
 import os
-from os import path
-
 from objects.enemy import Enemy
 from objects.explosion import Explosion
 from objects.mobs.randommeteor import RandomMeteor
@@ -12,6 +10,7 @@ from objects.resources.ImgResources import ImgResources
 from objects.resources.MiscResources import MiscResources
 from objects.resources.SoundResources import SoundResources
 from objects.settings import *
+from os import path
 
 # set up asset folders
 
@@ -94,7 +93,7 @@ def draw_lives(surf, x, y, lives, player_live_img):
         surf.blit(player_live_img, img_rect)
 
 
-def draw_shield_bar(surf, x, y, pct):
+def draw_shield_bar(surf, color, x, y, pct):
     if pct < 0:
         pct = 0
 
@@ -103,7 +102,7 @@ def draw_shield_bar(surf, x, y, pct):
     fill = (pct / 100) * BAR_LENGTH
     outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGTH)
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGTH)
-    pygame.draw.rect(surf, GREEN, fill_rect)
+    pygame.draw.rect(surf, color, fill_rect)
     pygame.draw.rect(surf, WHITE, outline_rect, 2)
 
 
@@ -222,12 +221,30 @@ while running:
         if len(enemies.sprites()) <= MAX_ENEMIES:
             new_enemy()
 
+    if player.fuel < 0:
+        soundResources.player_die_sound.play()
+        death_explosion = Explosion(player.rect.center, ImgResources.EXPLOSION_ANIMATIONS_PLAYER,
+                                    imgResources.explosion_animations)
+        all_sprites.add(death_explosion)
+        actual_lives = player.lives - 1
+        if death_explosion.alive():
+            player.lives = actual_lives
+            player.hide()
+            player.recharge_fuel()
+            player.recover()
+
     # Draw / render
     screen.fill(BLACK)
     screen.blit(imgResources.background, imgResources.background.get_rect())
     all_sprites.draw(screen)
-    draw_text(screen, str(score), 30, WIDTH // 2, 20)
-    draw_shield_bar(screen, 7, 7, player.shield)
+    draw_text(screen, str(score), 30, WIDTH / 2, 20)
+
+    draw_text(screen, "SHIELD", 16, 35, 7)
+    draw_shield_bar(screen, GREEN, 70, 10, player.shield)
+
+    draw_text(screen, "FUEL ", 16, 35, 27)
+    draw_shield_bar(screen, RED, 70, 31, player.fuel)
+
     draw_lives(screen, WIDTH - 100, 5, player.lives, imgResources.player_mini_img)
 
     if game_over:
