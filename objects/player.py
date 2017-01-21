@@ -8,6 +8,7 @@ from objects.settings import *
 class Player(pygame.sprite.Sprite):
     shield_max_value = 100
     fuel_max_value = 100
+    fuel_consumption = 0.2
     shoot_delay = 250
     max_hidden_time = 1000
 
@@ -61,11 +62,11 @@ class Player(pygame.sprite.Sprite):
 
     @shield.setter
     def shield(self, value):
-        self.shield = value
+        self.__shield = value
 
     @fuel.setter
     def fuel(self, value):
-        self.fuel = value
+        self.__fuel = value
 
     def update(self, *args):
 
@@ -97,7 +98,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.left = WIDTH_OBSTACLES
 
         if not self.__hidden:
-            self.__fuel -= 0.5
+            self.fuel -= Player.fuel_consumption
 
     def hide(self):
         self.__hidden = True
@@ -109,6 +110,8 @@ class Player(pygame.sprite.Sprite):
             self.__shield += random.randrange(10, 30)
             if self.__shield >= 100:
                 self.__shield = 100
+        if power_up_type == ImgResources.POWER_UP_FUEL:
+            self.fuel = Player.fuel_max_value
         if power_up_type == ImgResources.POWER_UP_GUN:
             self.__power += 1
             self.__power_time = pygame.time.get_ticks()

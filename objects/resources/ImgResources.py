@@ -1,7 +1,6 @@
-from os import path
 import pygame
-
 from objects.settings import BLACK
+from os import path
 
 
 class ImgResources:
@@ -10,6 +9,7 @@ class ImgResources:
     EXPLOSION_ANIMATIONS_PLAYER = 'player'
 
     POWER_UP_SHIELD = 'shield'
+    POWER_UP_FUEL = 'fuel'
     POWER_UP_GUN = 'gun'
     __IMG_FOLDER_PREFIX = "img"
 
@@ -26,7 +26,7 @@ class ImgResources:
         self.__meteors_obstacles = self.__load_meteors_img('meteors', 'grey')
         self.__meteors_mobs = self.__load_meteors_img('meteors', 'brown')
         self.__explosion_animations = self.__load_explosions_animations('Explosions_kenney')
-        self.__power_ups = self.__load_power_ups('powerups', 'shield_gold.png', 'bolt_gold.png')
+        self.__power_ups = self.__load_power_ups('powerups', 'shield_gold.png', 'fuel_gold.png', 'bolt_gold.png')
 
     @property
     def background(self):
@@ -68,10 +68,12 @@ class ImgResources:
     def power_ups(self):
         return self.__power_ups
 
-    def __load_power_ups(self, folder, shield_file_name, bolt_file_name):
-        return {ImgResources.POWER_UP_SHIELD: pygame.image.load(
-            path.join(self.__img_dir, folder, shield_file_name)).convert(),
-                ImgResources.POWER_UP_GUN: pygame.image.load(path.join(self.__img_dir, folder, bolt_file_name)).convert()}
+    def __load_power_ups(self, folder, shield_file_name, fuel_file_name, bolt_file_name):
+        return {
+            ImgResources.POWER_UP_SHIELD: pygame.image.load(
+                path.join(self.__img_dir, folder, shield_file_name)).convert(),
+            ImgResources.POWER_UP_FUEL: pygame.image.load(path.join(self.__img_dir, folder, fuel_file_name)).convert(),
+            ImgResources.POWER_UP_GUN: pygame.image.load(path.join(self.__img_dir, folder, bolt_file_name)).convert(), }
 
     @staticmethod
     def __load_explosions_img(image_directory, subfolder, img_filename):

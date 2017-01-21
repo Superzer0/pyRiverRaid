@@ -6,6 +6,7 @@ from objects.mobs.randommeteor import RandomMeteor
 from objects.mobs.rotatingmeteor import RotatingMeteor
 from objects.player import *
 from objects.powerup import PowerUp
+from objects.powerup_generators import *
 from objects.resources.ImgResources import ImgResources
 from objects.resources.MiscResources import MiscResources
 from objects.resources.SoundResources import SoundResources
@@ -13,8 +14,6 @@ from objects.settings import *
 from os import path
 
 # set up asset folders
-
-
 game_folder = path.join(os.path.dirname(__file__), 'resources')
 misc_dir = path.join(game_folder, 'misc')
 
@@ -41,6 +40,8 @@ powerups = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 enemies_shots = pygame.sprite.Group()
 all_sprites.add(player)
+shieldGenerator = ShieldGenerator(player, imgResources, all_sprites, powerups)
+fuelGenerator = FuelGenerator(player, imgResources, all_sprites, powerups)
 
 def new_mob():
     m = RandomMeteor(imgResources.meteor_mobs_img)
@@ -139,9 +140,11 @@ def player_collide(hit, new_object_fun):
     random.choice(soundResources.explosion_sounds).play()
     all_sprites.add(player_explosion)
     if is_terminal_hit:
+        print("terminated by:" + str(hit))
         soundResources.player_die_sound.play()
         death_explosion = Explosion(player.rect.center, ImgResources.EXPLOSION_ANIMATIONS_PLAYER, imgResources.explosion_animations)
         all_sprites.add(death_explosion)
+        player.recharge_fuel()
         player.hide()
         if not player.is_alive() and death_explosion.alive():
             return True
@@ -175,11 +178,7 @@ while running:
         score += 50 - hit.radius
         expl = Explosion(hit.rect.center, imgResources.EXPLOSION_ANIMATIONS_LG, imgResources.explosion_animations)
         all_sprites.add(expl)
-        if random.random() > 0.9:
-            pow = PowerUp(hit.rect.center, imgResources.power_ups, random.choice([ImgResources.POWER_UP_GUN, ImgResources.POWER_UP_SHIELD]))
-            all_sprites.add(pow)
-            powerups.add(pow)
-
+        shieldGenerator.generate()
         new_mob()
 
     hits = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
@@ -232,6 +231,8 @@ while running:
             player.hide()
             player.recharge_fuel()
             player.recover()
+
+    fuelGenerator.generate()
 
     # Draw / render
     screen.fill(BLACK)
