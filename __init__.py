@@ -70,9 +70,8 @@ for i in range(100):
 for i in range(100):
     new_obstacle(i, random.randrange(WIDTH - WIDTH_OBSTACLES - 50, WIDTH - 10))
 
-
-for i in range(20):
-    new_mob()
+# for i in range(20):
+#     new_mob()
 
 for i in range(5):
     new_enemy()
