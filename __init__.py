@@ -1,5 +1,6 @@
 # Pygame template - skeleton for a new pygame project
 import os
+from objects.context import Context
 from objects.enemy import Enemy
 from objects.explosion import Explosion
 from objects.mobs.randommeteor import RandomMeteor
@@ -35,13 +36,18 @@ imgResources = ImgResources(game_folder)
 mobs = pygame.sprite.Group()
 obstacles = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
-player = Player(imgResources, soundResources, all_sprites, bullets)
 powerups = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 enemies_shots = pygame.sprite.Group()
-all_sprites.add(player)
+context = Context(mobs, obstacles, bullets, powerups, enemies, enemies_shots)
+player = Player(imgResources, soundResources, all_sprites, bullets, context)
 shieldGenerator = ShieldGenerator(player, imgResources, all_sprites, powerups)
 fuelGenerator = FuelGenerator(player, imgResources, all_sprites, powerups)
+
+all_sprites.add(player)
+
+context._player = player
+
 
 def new_mob():
     m = RandomMeteor(imgResources.meteor_mobs_img)
@@ -197,6 +203,7 @@ while running:
         random.choice(soundResources.explosion_sounds).play()
         expl = Explosion(hit.rect.center, imgResources.EXPLOSION_ANIMATIONS_SM, imgResources.explosion_animations)
         all_sprites.add(expl)
+        context.playerCanShot = True
 
     # check to see if a enemy hit the player
     hits = pygame.sprite.spritecollide(player, enemies, True)
@@ -213,6 +220,7 @@ while running:
     # check to see if a player's shot hit the enemy
     hits = pygame.sprite.groupcollide(enemies, bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
+        context.playerCanShot = True
         death_explosion = Explosion(hit.rect.center, imgResources.EXPLOSION_ANIMATIONS_PLAYER, imgResources.explosion_animations)
         all_sprites.add(death_explosion)
         hit.kill()

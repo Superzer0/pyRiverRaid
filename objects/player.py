@@ -12,7 +12,7 @@ class Player(pygame.sprite.Sprite):
     shoot_delay = 250
     max_hidden_time = 1000
 
-    def __init__(self, imgResources, soundResources, all_sprites, bullets):
+    def __init__(self, imgResources, soundResources, all_sprites, bullets, context):
         pygame.sprite.Sprite.__init__(self)
         self.__player_power_up_img = imgResources.power_player_img
         self.__player_org_img = imgResources.player_img
@@ -30,6 +30,7 @@ class Player(pygame.sprite.Sprite):
         self.__last_shot = pygame.time.get_ticks()
         self.__hidden_time = pygame.time.get_ticks()
         self.__power_time = pygame.time.get_ticks()
+        self.context = context
 
     def set_player_img(self, player_img, x, y):
         self.image = pygame.transform.scale(player_img, (50, 38))
@@ -89,7 +90,8 @@ class Player(pygame.sprite.Sprite):
         if keystate[pygame.K_RIGHT]:
             self.__speedx = 8
         if keystate[pygame.K_SPACE]:
-            self.shoot()
+            if self.context.playerCanShot:
+                self.shoot()
 
         self.rect.x += self.__speedx
         if self.rect.right > WIDTH - WIDTH_OBSTACLES:
@@ -121,22 +123,23 @@ class Player(pygame.sprite.Sprite):
         if self.__hidden:
             return
 
-        now = pygame.time.get_ticks()
-        if now - self.__last_shot > Player.shoot_delay:
-            self.__last_shot = now
-            if self.__power == 1:
-                bullet = Bullet(self.rect.centerx, self.rect.top, self.__bullet_img)
-                self.__all_sprites.add(bullet)
-                self.__bullets.add(bullet)
-                random.choice(self.__soundResources.shoot_sounds).play()
-            if self.__power >= 2:
-                bullet1 = Bullet(self.rect.left, self.rect.centery, self.__bullet_img)
-                bullet2 = Bullet(self.rect.right, self.rect.centery, self.__bullet_img)
-                self.__all_sprites.add(bullet1)
-                self.__all_sprites.add(bullet2)
-                self.__bullets.add(bullet1)
-                self.__bullets.add(bullet2)
-                random.choice(self.__soundResources.shoot_sounds).play()
+        if self.context.playerCanShot:
+            now = pygame.time.get_ticks()
+            if now - self.__last_shot > Player.shoot_delay:
+                self.__last_shot = now
+                if self.__power == 1:
+                    bullet = Bullet(self.rect.centerx, self.rect.top, self.__bullet_img, self.context)
+                    self.__all_sprites.add(bullet)
+                    self.__bullets.add(bullet)
+                    random.choice(self.__soundResources.shoot_sounds).play()
+                if self.__power >= 2:
+                    bullet1 = Bullet(self.rect.left, self.rect.centery, self.__bullet_img)
+                    bullet2 = Bullet(self.rect.right, self.rect.centery, self.__bullet_img)
+                    self.__all_sprites.add(bullet1)
+                    self.__all_sprites.add(bullet2)
+                    self.__bullets.add(bullet1)
+                    self.__bullets.add(bullet2)
+                    random.choice(self.__soundResources.shoot_sounds).play()
 
     def was_hit(self, impact):
         """
