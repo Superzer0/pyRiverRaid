@@ -1,4 +1,4 @@
-class Context:
+class SpritesContext:
     def __init__(self, mobs, obstacles, bullets, powerups, enemies, enemies_shots):
         self._player = None
         self._mobs = mobs

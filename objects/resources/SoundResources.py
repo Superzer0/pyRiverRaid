@@ -1,18 +1,30 @@
 from os import path
+
 import pygame
 
+from objects.resources.ConfigReader import ConfigReader
 
-class SoundResources:
-    __SOUND_FOLDER_PREFIX = "snd"
 
-    def __init__(self, game_folder):
-        self.__game_folder = game_folder
-        self.__snd_dir = path.join(self.__game_folder, SoundResources.__SOUND_FOLDER_PREFIX)
-        self.__shoot_sounds = [pygame.mixer.Sound(path.join(self.__snd_dir, snd)) for snd in
-                               ['sfx_laser1.ogg', 'sfx_laser2.ogg']]
-        self.__explosion_sounds = [pygame.mixer.Sound(path.join(self.__snd_dir, snd)) for snd in
-                                   ['expl3.wav', 'expl6.wav']]
-        self.__player_die_sound = pygame.mixer.Sound(path.join(self.__snd_dir, 'rumble1.ogg'))
+class SoundResources(ConfigReader):
+    __SOUND_SECTION_CONFIG_NAME = 'SOUNDS'
+    __SOUND_FOLDER_CONFIG_NAME = 'soundFolderName'
+    __DEFAULT_MUSIC_CONFIG_KEY = 'defaultMusic'
+    __SHOOTS_SOUNDS_CONFIG_KEY = 'shootSounds'
+    __EXPLOSION_SOUNDS_CONFIG_KEY = 'expolosionSounds'
+    __PLAYER_DIE_SOUND_CONFIG_KEY = 'playerDieSound'
+
+    def __init__(self, game_folder, config):
+        ConfigReader.__init__(self, game_folder, config, SoundResources.__SOUND_SECTION_CONFIG_NAME)
+        self.__snd_dir = path.join(self.resources_folder,
+                                   self.get_config_property(SoundResources.__SOUND_FOLDER_CONFIG_NAME))
+        self.__shoot_sounds = self.get_sound_resources(SoundResources.__SHOOTS_SOUNDS_CONFIG_KEY)
+        self.__explosion_sounds = self.get_sound_resources(SoundResources.__EXPLOSION_SOUNDS_CONFIG_KEY)
+        self.__player_die_sound = self.get_sound_resources(SoundResources.__PLAYER_DIE_SOUND_CONFIG_KEY)[0]
+        self.__default_music_path = path.join(self.__snd_dir,
+                                              self.get_config_property(SoundResources.__DEFAULT_MUSIC_CONFIG_KEY))
+
+    def get_sound_resources(self, prop):
+        return [pygame.mixer.Sound(path.join(self.__snd_dir, snd)) for snd in self.get_config_property_value_list(prop)]
 
     @property
     def shoot_sounds(self):
@@ -27,7 +39,7 @@ class SoundResources:
         return self.__player_die_sound
 
     def load_default_music(self):
-        pygame.mixer.music.load(path.join(self.__snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
+        pygame.mixer.music.load(self.__default_music_path)
 
     @staticmethod
     def play_default_music():

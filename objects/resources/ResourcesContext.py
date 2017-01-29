@@ -1,0 +1,2 @@
+class ResourceContext:
+    pass
