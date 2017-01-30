@@ -2,14 +2,15 @@ import random
 
 import pygame
 
-from objects.settings import *
+from objects.globals.gamecolors import GameColors
+from objects.globals.gamesettings import GameSettings
 
 
 class RotatingMeteor(pygame.sprite.Sprite):
     def __init__(self, meteor_images, start_x, start_y, speed_x, speed_y, rot_speed):
         pygame.sprite.Sprite.__init__(self)
         self.__image_orig = random.choice(meteor_images)
-        self.__image_orig.set_colorkey(BLACK)
+        self.__image_orig.set_colorkey(GameColors.BLACK)
         self.image = self.__image_orig.copy()
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width * .85 / 2)
@@ -42,4 +43,4 @@ class RotatingMeteor(pygame.sprite.Sprite):
             self.rect.y = random.randrange(-200, -80)
 
     def is_on_the_border(self):
-        return self.rect.top > HEIGHT + 50 or self.rect.left < -50 or self.rect.right > WIDTH + 100
+        return self.rect.top > GameSettings.HEIGHT + 50 or self.rect.left < -50 or self.rect.right > GameSettings.WIDTH + 100

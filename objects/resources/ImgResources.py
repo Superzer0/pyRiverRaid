@@ -3,8 +3,8 @@ from os import path
 
 import pygame
 
+from objects.globals.gamecolors import GameColors
 from objects.resources.ConfigReader import ConfigReader
-from objects.settings import BLACK
 
 
 class ImgResources(ConfigReader):
@@ -47,7 +47,7 @@ class ImgResources(ConfigReader):
             self.__player_img = self.load_image(ImgResources.__IMG_PLAYER_CONFIG_KEY)
             self.__power_player_img = self.load_image(ImgResources.__IMG_POWER_PLAYER_CONFIG_KEY)
             self.__player_mini_img = pygame.transform.scale(self.__player_img, (25, 19))
-            self.__player_mini_img.set_colorkey(BLACK)
+            self.__player_mini_img.set_colorkey(GameColors.BLACK)
             self.__background = self.load_image(ImgResources.__IMG_BACKGROUND_CONFIG_KEY)
             self.__meteors_obstacles = self.__load_meteors_img(
                 self.get_config_property(ImgResources.__IMG_METEORS_OBSTACLES_CONFIG_KEY))
@@ -112,7 +112,7 @@ class ImgResources(ConfigReader):
     @staticmethod
     def __load_explosions_img(image_directory, subfolder, img_filename):
         explosion_image = pygame.image.load(path.join(image_directory, subfolder, img_filename)).convert()
-        explosion_image.set_colorkey(BLACK)
+        explosion_image.set_colorkey(GameColors.BLACK)
         return explosion_image
 
     def __load_meteors_img(self, subfolder):

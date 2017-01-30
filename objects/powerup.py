@@ -2,7 +2,8 @@ import logging
 
 import pygame
 
-from objects.settings import BLACK, HEIGHT
+from objects.globals.gamecolors import GameColors
+from objects.globals.gamesettings import GameSettings
 
 
 class PowerUp(pygame.sprite.Sprite):
@@ -12,7 +13,7 @@ class PowerUp(pygame.sprite.Sprite):
         self.__type = type
         self.__speedy = 5
         self.image = images[self.__type]
-        self.image.set_colorkey(BLACK)
+        self.image.set_colorkey(GameColors.BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = center
 
@@ -23,5 +24,5 @@ class PowerUp(pygame.sprite.Sprite):
     def update(self, *args):
         self.rect.y += self.__speedy
 
-        if self.rect.top > HEIGHT:
+        if self.rect.top > GameSettings.HEIGHT:
             self.kill()

@@ -2,7 +2,7 @@ import logging
 
 import pygame
 
-from objects.settings import BLACK
+from objects.globals.gamecolors import GameColors
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -10,7 +10,7 @@ class Bullet(pygame.sprite.Sprite):
         self.__logger = logging.getLogger(Bullet.__module__)
         pygame.sprite.Sprite.__init__(self)
         self.image = bullet_img
-        self.image.set_colorkey(BLACK)
+        self.image.set_colorkey(GameColors.BLACK)
         self.rect = self.image.get_rect()
         self.rect.bottom = y
         self.rect.centerx = x

@@ -4,8 +4,9 @@ import random
 import pygame
 
 from objects.bullet import Bullet
+from objects.globals.gamecolors import GameColors
+from objects.globals.gamesettings import GameSettings
 from objects.resources.ImgResources import ImgResources
-from objects.settings import *
 
 
 class Player(pygame.sprite.Sprite):
@@ -24,7 +25,7 @@ class Player(pygame.sprite.Sprite):
         self.__all_sprites = all_sprites
         self.__soundResources = soundResources
         self.__bullet_img = imgResources.bullet_img
-        self.set_player_img(self.__player_org_img, WIDTH / 2, HEIGHT - 10)
+        self.set_player_img(self.__player_org_img, GameSettings.WIDTH / 2, GameSettings.HEIGHT - 10)
         self.__speedx = 0
         self.__lives = 3
         self.__power = 1
@@ -38,7 +39,7 @@ class Player(pygame.sprite.Sprite):
 
     def set_player_img(self, player_img, x, y):
         self.image = pygame.transform.scale(player_img, (50, 38))
-        self.image.set_colorkey(BLACK)
+        self.image.set_colorkey(GameColors.BLACK)
         self.rect = self.image.get_rect()
         self.radius = 20
         # pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
@@ -75,7 +76,7 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, *args):
 
-        if self.__power >= 2 and pygame.time.get_ticks() - self.__power_time > POWERUP_TIME:
+        if self.__power >= 2 and pygame.time.get_ticks() - self.__power_time > GameSettings.POWERUP_TIME:
             self.__power -= 1
             self.__power_time = pygame.time.get_ticks()
             if self.__power == 1:
@@ -84,8 +85,8 @@ class Player(pygame.sprite.Sprite):
         # unhide if hidden
         if self.__hidden and pygame.time.get_ticks() - self.__hidden_time > Player.max_hidden_time:
             self.__hidden = False
-            self.rect.centerx = WIDTH / 2
-            self.rect.bottom = HEIGHT - 10
+            self.rect.centerx = GameSettings.WIDTH / 2
+            self.rect.bottom = GameSettings.HEIGHT - 10
 
         self.__speedx = 0
         keystate = pygame.key.get_pressed()
@@ -98,10 +99,10 @@ class Player(pygame.sprite.Sprite):
                 self.shoot()
 
         self.rect.x += self.__speedx
-        if self.rect.right > WIDTH - WIDTH_OBSTACLES:
-            self.rect.right = WIDTH - WIDTH_OBSTACLES
-        if self.rect.left < WIDTH_OBSTACLES:
-            self.rect.left = WIDTH_OBSTACLES
+        if self.rect.right > GameSettings.WIDTH - GameSettings.WIDTH_OBSTACLES:
+            self.rect.right = GameSettings.WIDTH - GameSettings.WIDTH_OBSTACLES
+        if self.rect.left < GameSettings.WIDTH_OBSTACLES:
+            self.rect.left = GameSettings.WIDTH_OBSTACLES
 
         if not self.__hidden:
             self.fuel -= Player.fuel_consumption
@@ -109,7 +110,7 @@ class Player(pygame.sprite.Sprite):
     def hide(self):
         self.__hidden = True
         self.__hidden_time = pygame.time.get_ticks()
-        self.rect.center = (WIDTH, HEIGHT + 200)
+        self.rect.center = (GameSettings.WIDTH, GameSettings.HEIGHT + 200)
 
     def power_up(self, power_up_type):
         if power_up_type == ImgResources.POWER_UP_SHIELD:

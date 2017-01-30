@@ -1,5 +1,4 @@
 import configparser
-import logging
 import os
 from logging.config import fileConfig
 
@@ -13,7 +12,6 @@ from objects.resources.ImgResources import ImgResources
 from objects.resources.MiscResources import MiscResources
 from objects.resources.ResourcesContext import ResourceContext
 from objects.resources.SoundResources import SoundResources
-from objects.settings import *
 from objects.spritescontext import SpritesContext
 
 fileConfig('logging.ini')
@@ -24,7 +22,7 @@ logger.info('starting game...')
 
 pygame.init()
 pygame.mixer.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((GameSettings.WIDTH, GameSettings.HEIGHT))
 clock = pygame.time.Clock()
 
 resourceContext = ResourceContext()
@@ -83,11 +81,11 @@ def new_enemy():
 
 # left obstacles
 for i in range(100):
-    new_obstacle(i, random.randrange(0, WIDTH_OBSTACLES - 50))
+    new_obstacle(i, random.randrange(0, GameSettings.WIDTH_OBSTACLES - 50))
 
 # right obstacles
 for i in range(100):
-    new_obstacle(i, random.randrange(WIDTH - WIDTH_OBSTACLES - 50, WIDTH - 10))
+    new_obstacle(i, random.randrange(GameSettings.WIDTH - GameSettings.WIDTH_OBSTACLES - 50, GameSettings.WIDTH - 10))
 
 # for i in range(20):
 #     new_mob()
@@ -98,7 +96,7 @@ for i in range(5):
 
 def draw_text(surf, text, size, x, y):
     font = resourceContext.miscResources.get_font(size)
-    text_surface = font.render(text, True, WHITE)
+    text_surface = font.render(text, True, GameColors.WHITE)
     text_rect = text_surface.get_rect()
     text_rect.midtop = (x, y)
     surf.blit(text_surface, text_rect)
@@ -122,19 +120,19 @@ def draw_shield_bar(surf, color, x, y, pct):
     outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGTH)
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGTH)
     pygame.draw.rect(surf, color, fill_rect)
-    pygame.draw.rect(surf, WHITE, outline_rect, 2)
+    pygame.draw.rect(surf, GameColors.WHITE, outline_rect, 2)
 
 
 def show_go_screen(imgResources):
     screen.blit(imgResources.background, imgResources.background.get_rect())
-    draw_text(screen, "Space river raid", 64, WIDTH / 2, HEIGHT / 4)
+    draw_text(screen, "Space river raid", 64, GameSettings.WIDTH / 2, GameSettings.HEIGHT / 4)
     draw_text(screen, "Arrow keys move, Space to fire", 22,
-              WIDTH / 2, HEIGHT / 2)
-    draw_text(screen, "Press a key to begin", 18, WIDTH / 2, HEIGHT * 3 / 4)
+              GameSettings.WIDTH / 2, GameSettings.HEIGHT / 2)
+    draw_text(screen, "Press a key to begin", 18, GameSettings.WIDTH / 2, GameSettings.HEIGHT * 3 / 4)
     pygame.display.flip()
     waiting = True
     while waiting:
-        clock.tick(FPS)
+        clock.tick(GameSettings.FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -173,7 +171,7 @@ def player_collide(hit, new_object_fun):
 
 while running:
     # keep loop running at the right speed
-    clock.tick(FPS)
+    clock.tick(GameSettings.FPS)
     # Process input (events)
     for event in pygame.event.get():
         # check for closing window
@@ -242,7 +240,7 @@ while running:
                                     resourceContext.imgResources.explosion_animations)
         all_sprites.add(death_explosion)
         hit.kill()
-        if len(enemies.sprites()) <= MAX_ENEMIES:
+        if len(enemies.sprites()) <= GameSettings.MAX_ENEMIES:
             new_enemy()
 
     if player.fuel < 0:
@@ -260,22 +258,22 @@ while running:
     fuelGenerator.generate()
 
     # Draw / render
-    screen.fill(BLACK)
+    screen.fill(GameColors.BLACK)
     screen.blit(resourceContext.imgResources.background, resourceContext.imgResources.background.get_rect())
     all_sprites.draw(screen)
-    draw_text(screen, str(score), 30, WIDTH / 2, 20)
+    draw_text(screen, str(score), 30, GameSettings.WIDTH / 2, 20)
 
     draw_text(screen, "SHIELD", 16, 35, 7)
-    draw_shield_bar(screen, GREEN, 70, 10, player.shield)
+    draw_shield_bar(screen, GameColors.GREEN, 70, 10, player.shield)
 
     draw_text(screen, "FUEL ", 16, 35, 27)
-    draw_shield_bar(screen, RED, 70, 31, player.fuel)
+    draw_shield_bar(screen, GameColors.RED, 70, 31, player.fuel)
 
-    draw_lives(screen, WIDTH - 100, 5, player.lives, resourceContext.imgResources.player_mini_img)
+    draw_lives(screen, GameSettings.WIDTH - 100, 5, player.lives, resourceContext.imgResources.player_mini_img)
 
     if game_over:
-        draw_text(screen, "Game over", 50, WIDTH // 2, HEIGHT // 2 - 70)
-        draw_text(screen, str(score), 50, WIDTH // 2, HEIGHT // 2)
+        draw_text(screen, "Game over", 50, GameSettings.WIDTH // 2, GameSettings.HEIGHT // 2 - 70)
+        draw_text(screen, str(score), 50, GameSettings.WIDTH // 2, GameSettings.HEIGHT // 2)
 
     # *after* drawing everything, flip the display
     pygame.display.flip()

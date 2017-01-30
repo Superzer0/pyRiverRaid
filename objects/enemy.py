@@ -4,8 +4,8 @@ import random
 import pygame
 
 from objects.bullet import Bullet
-from objects.settings import BLACK
-from objects.settings import WIDTH
+from objects.globals.gamecolors import GameColors
+from objects.globals.gamesettings import GameSettings
 
 
 class Direction:
@@ -26,11 +26,11 @@ class Enemy(pygame.sprite.Sprite):
         self.enemies_shots = enemies_shots
         self.imgResource = imgResources
         self.image = imgResources.enemy_img
-        self.image.set_colorkey(BLACK)
+        self.image.set_colorkey(GameColors.BLACK)
         self.__bullet_img = imgResources.bullet_img
         self.rect = self.image.get_rect()
         self.rect.bottom = random.randrange(0, 10)
-        self.origin_x = random.randrange(150, WIDTH - 150);
+        self.origin_x = random.randrange(150, GameSettings.WIDTH - 150);
         self.rect.centerx = self.origin_x
         self.direction_of_flight = self.getDirection()
         self.rotate()
@@ -41,9 +41,9 @@ class Enemy(pygame.sprite.Sprite):
         self.__power_time = pygame.time.get_ticks()
 
     def getDirection(self):
-        if 150 < self.origin_x < WIDTH / 2:
+        if 150 < self.origin_x < GameSettings.WIDTH / 2:
             return Direction.LEFT
-        if WIDTH / 2 < self.origin_x < WIDTH - 150:
+        if GameSettings.WIDTH / 2 < self.origin_x < GameSettings.WIDTH - 150:
             return Direction.RIGHT
 
     def shot(self):
