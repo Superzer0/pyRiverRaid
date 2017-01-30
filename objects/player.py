@@ -1,5 +1,8 @@
-import pygame
+import logging
 import random
+
+import pygame
+
 from objects.bullet import Bullet
 from objects.resources.ImgResources import ImgResources
 from objects.settings import *
@@ -14,6 +17,7 @@ class Player(pygame.sprite.Sprite):
 
     def __init__(self, imgResources, soundResources, all_sprites, bullets, context):
         pygame.sprite.Sprite.__init__(self)
+        self.__logger = logging.getLogger(Player.__module__)
         self.__player_power_up_img = imgResources.power_player_img
         self.__player_org_img = imgResources.player_img
         self.__bullets = bullets

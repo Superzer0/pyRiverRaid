@@ -1,3 +1,5 @@
+import logging
+
 import pygame
 
 from objects.settings import BLACK
@@ -5,6 +7,7 @@ from objects.settings import BLACK
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, bullet_img, context, speedy=-10):
+        self.__logger = logging.getLogger(Bullet.__module__)
         pygame.sprite.Sprite.__init__(self)
         self.image = bullet_img
         self.image.set_colorkey(BLACK)

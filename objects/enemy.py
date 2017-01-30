@@ -1,15 +1,17 @@
-import pygame
+import logging
 import random
+
+import pygame
+
 from objects.bullet import Bullet
 from objects.settings import BLACK
-from objects.settings import HEIGHT
-from objects.settings import MAX_ENEMIES
 from objects.settings import WIDTH
 
 
 class Direction:
     LEFT = -1
     RIGHT = 1
+
 
 class Enemy(pygame.sprite.Sprite):
     shoot_delay = 750
@@ -18,6 +20,7 @@ class Enemy(pygame.sprite.Sprite):
 
     def __init__(self, all_sprites, enemies, enemies_shots, imgResources):
         pygame.sprite.Sprite.__init__(self)
+        self.__logger = logging.getLogger(Enemy.__module__)
         self.all_sprites = all_sprites
         self.enemies = enemies
         self.enemies_shots = enemies_shots
@@ -38,9 +41,9 @@ class Enemy(pygame.sprite.Sprite):
         self.__power_time = pygame.time.get_ticks()
 
     def getDirection(self):
-        if self.origin_x > 150 and self.origin_x < WIDTH / 2:
+        if 150 < self.origin_x < WIDTH / 2:
             return Direction.LEFT
-        if self.origin_x > WIDTH / 2 and self.origin_x < WIDTH - 150:
+        if WIDTH / 2 < self.origin_x < WIDTH - 150:
             return Direction.RIGHT
 
     def shot(self):

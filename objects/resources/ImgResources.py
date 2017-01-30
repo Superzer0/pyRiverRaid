@@ -1,3 +1,4 @@
+import logging
 from os import path
 
 import pygame
@@ -36,22 +37,28 @@ class ImgResources(ConfigReader):
     __IMG_BOLT_CONFIG_KEY = "boltPowerUp"
 
     def __init__(self, game_folder, config):
-        ConfigReader.__init__(self, game_folder, config, ImgResources.__IMG_CONFIG_SECTION_NAME)
-        self.__img_dir = path.join(self.resources_folder,
-                                   self.get_config_property(ImgResources.__IMG_FOLDER_CONFIG_KEY))
-        self.__bullet_img = self.load_image(ImgResources.__IMG_BULLET_CONFIG_KEY)
-        self.__enemy_img = pygame.transform.rotate(self.load_image(ImgResources.__IMG_ENEMY_CONFIG_KEY), 180)
-        self.__player_img = self.load_image(ImgResources.__IMG_PLAYER_CONFIG_KEY)
-        self.__power_player_img = self.load_image(ImgResources.__IMG_POWER_PLAYER_CONFIG_KEY)
-        self.__player_mini_img = pygame.transform.scale(self.__player_img, (25, 19))
-        self.__player_mini_img.set_colorkey(BLACK)
-        self.__background = self.load_image(ImgResources.__IMG_BACKGROUND_CONFIG_KEY)
-        self.__meteors_obstacles = self.__load_meteors_img(
-            self.get_config_property(ImgResources.__IMG_METEORS_OBSTACLES_CONFIG_KEY))
-        self.__meteors_mobs = self.__load_meteors_img(
-            self.get_config_property(ImgResources.__IMG_METEORS_MOBS_CONFIG_KEY))
-        self.__explosion_animations = self.__load_explosions_animations()
-        self.__power_ups = self.__load_power_ups()
+        self.__logger = logging.getLogger(ImgResources.__module__)
+        try:
+            ConfigReader.__init__(self, game_folder, config, ImgResources.__IMG_CONFIG_SECTION_NAME)
+            self.__img_dir = path.join(self.resources_folder,
+                                       self.get_config_property(ImgResources.__IMG_FOLDER_CONFIG_KEY))
+            self.__bullet_img = self.load_image(ImgResources.__IMG_BULLET_CONFIG_KEY)
+            self.__enemy_img = pygame.transform.rotate(self.load_image(ImgResources.__IMG_ENEMY_CONFIG_KEY), 180)
+            self.__player_img = self.load_image(ImgResources.__IMG_PLAYER_CONFIG_KEY)
+            self.__power_player_img = self.load_image(ImgResources.__IMG_POWER_PLAYER_CONFIG_KEY)
+            self.__player_mini_img = pygame.transform.scale(self.__player_img, (25, 19))
+            self.__player_mini_img.set_colorkey(BLACK)
+            self.__background = self.load_image(ImgResources.__IMG_BACKGROUND_CONFIG_KEY)
+            self.__meteors_obstacles = self.__load_meteors_img(
+                self.get_config_property(ImgResources.__IMG_METEORS_OBSTACLES_CONFIG_KEY))
+            self.__meteors_mobs = self.__load_meteors_img(
+                self.get_config_property(ImgResources.__IMG_METEORS_MOBS_CONFIG_KEY))
+            self.__explosion_animations = self.__load_explosions_animations()
+            self.__power_ups = self.__load_power_ups()
+            self.__logger.info('loaded image resources')
+        except Exception:
+            self.__logger.error('loading image resources failed')
+            raise
 
     @property
     def background(self):

@@ -1,4 +1,4 @@
-import random
+import logging
 
 import pygame
 
@@ -8,6 +8,7 @@ from objects.settings import BLACK, HEIGHT
 class PowerUp(pygame.sprite.Sprite):
     def __init__(self, center, images, type):
         pygame.sprite.Sprite.__init__(self)
+        self.__logger = logging.getLogger(PowerUp.__module__)
         self.__type = type
         self.__speedy = 5
         self.image = images[self.__type]

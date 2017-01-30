@@ -1,6 +1,7 @@
-# Pygame template - skeleton for a new pygame project
 import configparser
+import logging
 import os
+from logging.config import fileConfig
 
 from objects.enemy import Enemy
 from objects.explosion import Explosion
@@ -14,6 +15,10 @@ from objects.resources.ResourcesContext import ResourceContext
 from objects.resources.SoundResources import SoundResources
 from objects.settings import *
 from objects.spritescontext import SpritesContext
+
+fileConfig('logging.ini')
+logger = logging.getLogger()
+logger.info('starting game...')
 
 # set up asset folders
 
@@ -35,8 +40,8 @@ try:
     resourceContext.miscResources = MiscResources(game_folder, config)
     resourceContext.imgResources = ImgResources(game_folder, config)
 except IOError:
-    print("Cannot load resources.")
-    raise  # TODO: add logging here
+    logger.error("Cannot load resources.")
+    raise
 
 
 pygame.display.set_caption("Space Raid")
@@ -154,7 +159,7 @@ def player_collide(hit, new_object_fun):
     random.choice(resourceContext.soundResources.explosion_sounds).play()
     all_sprites.add(player_explosion)
     if is_terminal_hit:
-        print("terminated by:" + str(hit))
+        logger.debug("terminated by:" + str(hit))
         resourceContext.soundResources.player_die_sound.play()
         death_explosion = Explosion(player.rect.center, ImgResources.EXPLOSION_ANIMATIONS_PLAYER,
                                     resourceContext.imgResources.explosion_animations)
