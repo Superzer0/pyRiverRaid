@@ -15,6 +15,30 @@ class SpritesContext:
     def player(self):
         return self._player
 
+    @property
+    def obstacles(self):
+        return self._obstacles
+
+    @property
+    def bullets(self):
+        return self._bullets
+
+    @property
+    def mobs(self):
+        return self._mobs
+
+    @property
+    def powerups(self):
+        return self._powerups
+
+    @property
+    def enemies_shots(self):
+        return self._enemies_shots
+
+    @property
+    def enemies(self):
+        return self._enemies
+
     @player.setter
     def player(self, player):
         self._player = player
