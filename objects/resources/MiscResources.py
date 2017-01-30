@@ -3,10 +3,10 @@ from os import path
 
 import pygame
 
-from objects.resources.ConfigReader import ConfigReader
+from objects.resources.ConfigReader import ResourcesReader
 
 
-class MiscResources(ConfigReader):
+class MiscResources(ResourcesReader):
     __MISC_CONFIG_SECTION_NAME = "MISC"
     __MISC_FOLDER_CONFIG_KEY = "miscFolderName"
     __DEFAULT_FONT_CONFIG_KEY = "defaultFont"
@@ -15,7 +15,7 @@ class MiscResources(ConfigReader):
         self.__logger = logging.getLogger(MiscResources.__module__)
 
         try:
-            ConfigReader.__init__(self, game_folder, config, MiscResources.__MISC_CONFIG_SECTION_NAME)
+            ResourcesReader.__init__(self, game_folder, config, MiscResources.__MISC_CONFIG_SECTION_NAME)
             self.__misc_dir = path.join(self.resources_folder,
                                         self.get_config_property(MiscResources.__MISC_FOLDER_CONFIG_KEY))
             self.__default_font = path.join(self.__misc_dir,

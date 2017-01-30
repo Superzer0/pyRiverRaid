@@ -3,10 +3,10 @@ from os import path
 
 import pygame
 
-from objects.resources.ConfigReader import ConfigReader
+from objects.resources.ConfigReader import ResourcesReader
 
 
-class SoundResources(ConfigReader):
+class SoundResources(ResourcesReader):
     __SOUND_SECTION_CONFIG_NAME = 'SOUNDS'
     __SOUND_FOLDER_CONFIG_NAME = 'soundFolderName'
     __DEFAULT_MUSIC_CONFIG_KEY = 'defaultMusic'
@@ -17,7 +17,7 @@ class SoundResources(ConfigReader):
     def __init__(self, game_folder, config):
         self.__logger = logging.getLogger(SoundResources.__module__)
         try:
-            ConfigReader.__init__(self, game_folder, config, SoundResources.__SOUND_SECTION_CONFIG_NAME)
+            ResourcesReader.__init__(self, game_folder, config, SoundResources.__SOUND_SECTION_CONFIG_NAME)
             self.__snd_dir = path.join(self.resources_folder,
                                        self.get_config_property(SoundResources.__SOUND_FOLDER_CONFIG_NAME))
             self.__shoot_sounds = self.get_sound_resources(SoundResources.__SHOOTS_SOUNDS_CONFIG_KEY)

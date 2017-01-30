@@ -4,10 +4,10 @@ from os import path
 import pygame
 
 from objects.globals.gamecolors import GameColors
-from objects.resources.ConfigReader import ConfigReader
+from objects.resources.ConfigReader import ResourcesReader
 
 
-class ImgResources(ConfigReader):
+class ImgResources(ResourcesReader):
     EXPLOSION_ANIMATIONS_LG = 'lg'
     EXPLOSION_ANIMATIONS_SM = 'sm'
     EXPLOSION_ANIMATIONS_PLAYER = 'player'
@@ -39,7 +39,7 @@ class ImgResources(ConfigReader):
     def __init__(self, game_folder, config):
         self.__logger = logging.getLogger(ImgResources.__module__)
         try:
-            ConfigReader.__init__(self, game_folder, config, ImgResources.__IMG_CONFIG_SECTION_NAME)
+            ResourcesReader.__init__(self, game_folder, config, ImgResources.__IMG_CONFIG_SECTION_NAME)
             self.__img_dir = path.join(self.resources_folder,
                                        self.get_config_property(ImgResources.__IMG_FOLDER_CONFIG_KEY))
             self.__bullet_img = self.load_image(ImgResources.__IMG_BULLET_CONFIG_KEY)

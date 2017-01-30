@@ -12,9 +12,10 @@ from objects.resources.ImgResources import ImgResources
 from objects.resources.MiscResources import MiscResources
 from objects.resources.ResourcesContext import ResourceContext
 from objects.resources.SoundResources import SoundResources
+from objects.resources.i18n.LocalizationContext import LocalizationContext
 from objects.spritescontext import SpritesContext
 
-fileConfig('logging.ini')
+fileConfig(os.path.join('configuration', 'logging.ini'))
 logger = logging.getLogger()
 logger.info('starting game...')
 
@@ -30,7 +31,7 @@ resourceContext = ResourceContext()
 try:
     game_folder = os.path.dirname(__file__)
     config = configparser.ConfigParser()
-    config.read('resources.ini')
+    config.read(os.path.join('configuration', 'resources.ini'))
     # initialize pygame and create window
 
     resourceContext.soundResources = SoundResources(game_folder, config)
@@ -41,8 +42,12 @@ except IOError:
     logger.error("Cannot load resources.")
     raise
 
+config = configparser.ConfigParser()
+config.read(os.path.join('configuration', 'translations.ini'))
+localizationContext = LocalizationContext(config, 'PL')
 
-pygame.display.set_caption("Space Raid")
+label = localizationContext.InitialScreen.title_label
+pygame.display.set_caption(label)
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 obstacles = pygame.sprite.Group()
@@ -125,10 +130,12 @@ def draw_shield_bar(surf, color, x, y, pct):
 
 def show_go_screen(imgResources):
     screen.blit(imgResources.background, imgResources.background.get_rect())
-    draw_text(screen, "Space river raid", 64, GameSettings.WIDTH / 2, GameSettings.HEIGHT / 4)
-    draw_text(screen, "Arrow keys move, Space to fire", 22,
+    draw_text(screen, localizationContext.InitialScreen.title_label, 64, GameSettings.WIDTH / 2,
+              GameSettings.HEIGHT / 4)
+    draw_text(screen, localizationContext.InitialScreen.instructions_1_label, 22,
               GameSettings.WIDTH / 2, GameSettings.HEIGHT / 2)
-    draw_text(screen, "Press a key to begin", 18, GameSettings.WIDTH / 2, GameSettings.HEIGHT * 3 / 4)
+    draw_text(screen, localizationContext.InitialScreen.instructions_2_label, 18, GameSettings.WIDTH / 2,
+              GameSettings.HEIGHT * 3 / 4)
     pygame.display.flip()
     waiting = True
     while waiting:
@@ -263,16 +270,17 @@ while running:
     all_sprites.draw(screen)
     draw_text(screen, str(score), 30, GameSettings.WIDTH / 2, 20)
 
-    draw_text(screen, "SHIELD", 16, 35, 7)
+    draw_text(screen, localizationContext.GameScreen.shield_label, 16, 35, 7)
     draw_shield_bar(screen, GameColors.GREEN, 70, 10, player.shield)
 
-    draw_text(screen, "FUEL ", 16, 35, 27)
+    draw_text(screen, localizationContext.GameScreen.fuel_label, 16, 35, 27)
     draw_shield_bar(screen, GameColors.RED, 70, 31, player.fuel)
 
     draw_lives(screen, GameSettings.WIDTH - 100, 5, player.lives, resourceContext.imgResources.player_mini_img)
 
     if game_over:
-        draw_text(screen, "Game over", 50, GameSettings.WIDTH // 2, GameSettings.HEIGHT // 2 - 70)
+        draw_text(screen, localizationContext.InitialScreen.game_over_label, 50, GameSettings.WIDTH // 2,
+                  GameSettings.HEIGHT // 2 - 70)
         draw_text(screen, str(score), 50, GameSettings.WIDTH // 2, GameSettings.HEIGHT // 2)
 
     # *after* drawing everything, flip the display
