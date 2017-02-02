@@ -6,7 +6,7 @@ from objects.globals.gamecolors import GameColors
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, bullet_img, context, speedy=-10):
+    def __init__(self, x, y, bullet_img, context, speedy=-30):
         self.__logger = logging.getLogger(Bullet.__module__)
         pygame.sprite.Sprite.__init__(self)
         self.image = bullet_img

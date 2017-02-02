@@ -11,6 +11,7 @@ from objects.resources.SoundResources import SoundResources
 from objects.resources.i18n.LocalizationContext import LocalizationContext
 from objects.screens.base_screen import BaseScreen
 from objects.screens.game_menu_screen import GameMenuScreen
+from objects.screens.game_over_screen import GameOverScreen
 from objects.screens.main_game_screen import MainGameScreen
 
 
@@ -59,9 +60,13 @@ if __name__ == '__main__':
 
     gameMenuScreen = GameMenuScreen(resource_context, localization_context)
     mainScreen = MainGameScreen(resource_context, localization_context)
+    gameOverScreen = GameOverScreen(resource_context, localization_context)
+    gameScreenResult = None
 
-    for gameScreen in [gameMenuScreen, mainScreen]:
-        gameScreenResult = gameScreen.run(py_game_clock, py_game_screen)
+    # play the music
+    pygame.mixer.music.play(loops=-1)
+    for gameScreen in [gameMenuScreen, mainScreen, gameOverScreen]:
+        gameScreenResult = gameScreen.run(py_game_clock, py_game_screen, gameScreenResult)
         if not BaseScreen.screen_finished_normally(gameScreenResult):
             pygame.quit()
             break

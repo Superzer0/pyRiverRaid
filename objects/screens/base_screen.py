@@ -1,13 +1,19 @@
+import abc
+
 from objects.globals.gamecolors import GameColors
 
 
-class BaseScreen:
+class BaseScreen(object, metaclass=abc.ABCMeta):
     SCREEN_END_REASON = "SCREEN_END_REASON"
     SCREEN_END_REASON_QUIT = "QUIT_GAME"
     SCREEN_END_REASON_NORMAL = "REASON_NORMAL"
 
     def __init__(self, resourceContext):
         self.__resourceContext = resourceContext
+
+    @abc.abstractmethod
+    def run(self, clock, screen, args=None):
+        raise NotImplementedError('users must define run to use this base class')
 
     def draw_text(self, surf, text, size, x, y):
         font = self.__resourceContext.miscResources.get_font(size)

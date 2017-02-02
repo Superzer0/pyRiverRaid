@@ -5,3 +5,5 @@ class GameSettings:
     POWERUP_TIME = 5000
     WIDTH_OBSTACLES = 150
     MAX_ENEMIES = 8
+    BAR_LENGTH = 100
+    BAR_HEIGTH = 10

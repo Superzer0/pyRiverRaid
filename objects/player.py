@@ -10,11 +10,11 @@ from objects.resources.ImgResources import ImgResources
 
 
 class Player(pygame.sprite.Sprite):
-    shield_max_value = 100
-    fuel_max_value = 100
-    fuel_consumption = 0.2
-    shoot_delay = 250
-    max_hidden_time = 1000
+    SHIELD_MAX_VALUE = 100
+    FUEL_MAX_VALUE = 100
+    FUEL_CONSUMPTION = 0.2
+    SHOOT_DELAY = 25
+    MAX_HIDDEN_TIME = 1000
 
     def __init__(self, imgResources, soundResources, all_sprites, bullets, context):
         pygame.sprite.Sprite.__init__(self)
@@ -30,8 +30,8 @@ class Player(pygame.sprite.Sprite):
         self.__lives = 3
         self.__power = 1
         self.__hidden = False
-        self.__shield = Player.shield_max_value
-        self.__fuel = Player.fuel_max_value
+        self.__shield = Player.SHIELD_MAX_VALUE
+        self.__fuel = Player.FUEL_MAX_VALUE
         self.__last_shot = pygame.time.get_ticks()
         self.__hidden_time = pygame.time.get_ticks()
         self.__power_time = pygame.time.get_ticks()
@@ -62,18 +62,6 @@ class Player(pygame.sprite.Sprite):
     def power(self):
         return self.__power
 
-    @lives.setter
-    def lives(self, value):
-        self.__lives = value
-
-    @shield.setter
-    def shield(self, value):
-        self.__shield = value
-
-    @fuel.setter
-    def fuel(self, value):
-        self.__fuel = value
-
     def update(self, *args):
 
         if self.__power >= 2 and pygame.time.get_ticks() - self.__power_time > GameSettings.POWERUP_TIME:
@@ -83,7 +71,7 @@ class Player(pygame.sprite.Sprite):
                 self.set_player_img(self.__player_org_img, self.rect.centerx, self.rect.bottom)
 
         # unhide if hidden
-        if self.__hidden and pygame.time.get_ticks() - self.__hidden_time > Player.max_hidden_time:
+        if self.__hidden and pygame.time.get_ticks() - self.__hidden_time > Player.MAX_HIDDEN_TIME:
             self.__hidden = False
             self.rect.centerx = GameSettings.WIDTH / 2
             self.rect.bottom = GameSettings.HEIGHT - 10
@@ -95,7 +83,6 @@ class Player(pygame.sprite.Sprite):
         if keystate[pygame.K_RIGHT]:
             self.__speedx = 8
         if keystate[pygame.K_SPACE]:
-            if self.context.playerCanShot:
                 self.shoot()
 
         self.rect.x += self.__speedx
@@ -105,7 +92,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.left = GameSettings.WIDTH_OBSTACLES
 
         if not self.__hidden:
-            self.fuel -= Player.fuel_consumption
+            self.__fuel -= Player.FUEL_CONSUMPTION
 
     def hide(self):
         self.__hidden = True
@@ -116,9 +103,9 @@ class Player(pygame.sprite.Sprite):
         if power_up_type == ImgResources.POWER_UP_SHIELD:
             self.__shield += random.randrange(10, 30)
             if self.__shield >= 100:
-                self.__shield = 100
+                self.recover_shield()
         if power_up_type == ImgResources.POWER_UP_FUEL:
-            self.fuel = Player.fuel_max_value
+            self.recharge_fuel()
         if power_up_type == ImgResources.POWER_UP_GUN:
             self.__power += 1
             self.__power_time = pygame.time.get_ticks()
@@ -130,7 +117,7 @@ class Player(pygame.sprite.Sprite):
 
         if self.context.playerCanShot:
             now = pygame.time.get_ticks()
-            if now - self.__last_shot > Player.shoot_delay:
+            if now - self.__last_shot > Player.SHOOT_DELAY:
                 self.__last_shot = now
                 if self.__power == 1:
                     bullet = Bullet(self.rect.centerx, self.rect.top, self.__bullet_img, self.context)
@@ -155,20 +142,26 @@ class Player(pygame.sprite.Sprite):
         if self.__shield < 0:
             self.__lives -= 1
             if self.__lives > 0:
-                self.__shield = 100
+                self.recover_shield()
+                self.recharge_fuel()
             return True
         else:
             return False
 
     def is_alive(self):
         """ Returns information if player have enough lives to continue game. """
-        if self.__lives < 1:
-            return False
-        else:
-            return True
+        return self.__lives > 0
 
     def recharge_fuel(self):
-        self.__fuel = Player.fuel_max_value
+        self.__fuel = Player.FUEL_MAX_VALUE
 
-    def recover(self):
-        self.__shield = Player.shield_max_value
+    def has_fuel(self):
+        return self.__fuel > 0
+
+    def fuel_is_empty(self):
+        self.__lives -= 1
+        if self.__lives > 0:
+            self.recover_shield()
+
+    def recover_shield(self):
+        self.__shield = Player.SHIELD_MAX_VALUE
