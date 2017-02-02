@@ -1,5 +1,9 @@
+import datetime
+import math
+
 from objects.enemy import Enemy
 from objects.explosion import Explosion
+from objects.leaderboards.leaderboard_entry import LeaderboardEntry
 from objects.mobs.randommeteor import RandomMeteor
 from objects.mobs.rotatingmeteor import RotatingMeteor
 from objects.player import *
@@ -16,7 +20,9 @@ class MainGameScreen(BaseScreen):
         self.__logger = logging.getLogger(MainGameScreen.__module__)
         self.__resourceContext = resourceContext
         self.__localizationContext = localizationContext
-        self.__score = 0
+        self.__hits = 0
+        self.__power_ups = 0
+        self.__level = 1
 
     def __init_screen(self):
         self.all_sprites = pygame.sprite.Group()
@@ -64,10 +70,10 @@ class MainGameScreen(BaseScreen):
             self.all_sprites.update(screen)
 
             score += self.__mob_shot_down()
+            score += self.__player_shoot_down_enemy()
 
             self.__player_got_power_up(player)
             self.__player_shoot_down_power_up()
-            self.__player_shoot_down_enemy()
 
             running = self.__player_check_fuel(player)
             running = self.__player_hit_by_mob(player, running)
@@ -90,7 +96,14 @@ class MainGameScreen(BaseScreen):
                     quit_reason = BaseScreen.SCREEN_END_REASON_QUIT
 
         self.__clean_up_screen(screen)
-        return {BaseScreen.SCREEN_END_REASON: quit_reason, 'score': score}
+
+        return {BaseScreen.SCREEN_END_REASON: quit_reason,
+                LeaderboardEntry.LEVEL: self.__level,
+                LeaderboardEntry.POWER_UPS: self.__power_ups,
+                LeaderboardEntry.HITS: self.__hits,
+                LeaderboardEntry.SCORE: score,
+                LeaderboardEntry.DATE: datetime.datetime.now(),
+                LeaderboardEntry.PLAYER_NAME: 'anonymous player ' + str(random.randint(1, 20))}
 
     def draw_sprites(self, player, score, screen):
         screen.fill(GameColors.BLACK)
@@ -98,9 +111,9 @@ class MainGameScreen(BaseScreen):
                     self.__resourceContext.imgResources.background.get_rect())
         self.all_sprites.draw(screen)
         self.draw_text(screen, str(score), 30, GameSettings.WIDTH / 2, 20)
-        self.draw_text(screen, self.__localizationContext.GameScreen.shield_label, 16, 35, 7)
+        self.draw_text(screen, self.__localizationContext.main_game_screen.shield_label, 16, 35, 7)
         self.__draw_hud_bar(screen, GameColors.GREEN, 70, 10, player.shield)
-        self.draw_text(screen, self.__localizationContext.GameScreen.fuel_label, 16, 35, 27)
+        self.draw_text(screen, self.__localizationContext.main_game_screen.fuel_label, 16, 35, 27)
         self.__draw_hud_bar(screen, GameColors.RED, 70, 31, player.fuel)
         self.__draw_lives(screen, GameSettings.WIDTH - 100, 5, player.lives,
                           self.__resourceContext.imgResources.player_mini_img)
@@ -122,15 +135,21 @@ class MainGameScreen(BaseScreen):
     def __player_shoot_down_enemy(self):
         hits = pygame.sprite.groupcollide(self.spriteContext.enemies, self.spriteContext.bullets, True,
                                           pygame.sprite.collide_circle)
+        score_change = 0
         for hit in hits:
             self.spriteContext.playerCanShot = True
+            random.choice(self.__resourceContext.soundResources.explosion_sounds).play()
             death_explosion = Explosion(hit.rect.center,
                                         self.__resourceContext.imgResources.EXPLOSION_ANIMATIONS_PLAYER,
                                         self.__resourceContext.imgResources.explosion_animations)
             self.all_sprites.add(death_explosion)
             hit.kill()
+            self.__hits += 1
+            score_change += int(math.fabs(50 - hit.radius))
+            self.shieldGenerator.generate()
             if len(self.spriteContext.enemies.sprites()) <= GameSettings.MAX_ENEMIES:
                 self.__new_enemy()
+        return score_change
 
     def __enemy_shot_down_player(self, player, running):
         # check to see if a enemy's shot hit the player
@@ -143,6 +162,7 @@ class MainGameScreen(BaseScreen):
 
     def __player_hit_enemy(self, player, running):
         hits = pygame.sprite.spritecollide(player, self.spriteContext.enemies, True)
+
         if hits:
             hit = hits[0]
             running = self.__player_collide(hit, lambda: self.__new_obstacle(1, hit.rect.x))
@@ -163,6 +183,7 @@ class MainGameScreen(BaseScreen):
         hits = pygame.sprite.spritecollide(player, self.spriteContext.powerups, True)
         for hit in hits:
             player.power_up(hit.type)
+            self.__power_ups += 1
 
     def __player_hit_by_obstacle(self, player, running):
         hits = pygame.sprite.spritecollide(player, self.spriteContext.obstacles, True, pygame.sprite.collide_circle)
@@ -189,6 +210,7 @@ class MainGameScreen(BaseScreen):
             self.shieldGenerator.generate()
             self.__new_mob()
             score_change += 50 - hit.radius
+            self.__hits += 1
 
         return score_change
 

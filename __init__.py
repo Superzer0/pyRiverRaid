@@ -2,6 +2,7 @@ import configparser
 import os
 from logging.config import fileConfig
 
+from objects.leaderboards.leaderboard_service import LeaderBoardService
 from objects.player import *
 from objects.powerup_generators import *
 from objects.resources.ImgResources import ImgResources
@@ -56,11 +57,13 @@ if __name__ == '__main__':
     resource_context = load_resources(game_folder)
     localization_context = load_localization()
 
-    pygame.display.set_caption(localization_context.InitialScreen.title_label)
+    pygame.display.set_caption(localization_context.initial_screen.title_label)
+
+    leader_board_service = LeaderBoardService(os.path.join(game_folder, 'logs', 'leader_board.csv'))
 
     gameMenuScreen = GameMenuScreen(resource_context, localization_context)
     mainScreen = MainGameScreen(resource_context, localization_context)
-    gameOverScreen = GameOverScreen(resource_context, localization_context)
+    gameOverScreen = GameOverScreen(resource_context, localization_context, leader_board_service)
     gameScreenResult = None
 
     # play the music
