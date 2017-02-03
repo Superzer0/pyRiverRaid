@@ -24,3 +24,11 @@ class GameOverLocalization(ConfigReader):
     @property
     def level_label(self):
         return self.get_config_property('game_over_summary_level')
+
+    @property
+    def name_enter_label(self):
+        return self.get_config_property('game_over_enter_name')
+
+    @property
+    def continue_label(self):
+        return self.get_config_property('game_over_continue')

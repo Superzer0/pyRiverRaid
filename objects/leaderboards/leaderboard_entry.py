@@ -40,6 +40,10 @@ class LeaderboardEntry:
     def player_name(self):
         return self.__row.get(LeaderboardEntry.PLAYER_NAME, '')
 
+    @player_name.setter
+    def player_name(self, value):
+        self.__row[LeaderboardEntry.PLAYER_NAME] = value
+
     @property
     def date(self):
         return self.__row.get(LeaderboardEntry.DATE, datetime.datetime.min)

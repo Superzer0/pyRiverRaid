@@ -5,6 +5,7 @@ from objects.globals.gamecolors import GameColors
 
 class BaseScreen(object, metaclass=abc.ABCMeta):
     SCREEN_END_REASON = "SCREEN_END_REASON"
+    SCREEN_NEXT = "SCREEN_NEXT"
     SCREEN_END_REASON_QUIT = "QUIT_GAME"
     SCREEN_END_REASON_NORMAL = "REASON_NORMAL"
 
@@ -15,11 +16,16 @@ class BaseScreen(object, metaclass=abc.ABCMeta):
     def run(self, clock, screen, args=None):
         raise NotImplementedError('users must define run to use this base class')
 
-    def draw_text(self, surf, text, size, x, y):
+    def draw_text(self, surf, text, size, x, y, color=GameColors.WHITE, centered=True):
         font = self.__resourceContext.miscResources.get_font(size)
-        text_surface = font.render(text, True, GameColors.WHITE)
+        text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
-        text_rect.midtop = (x, y)
+        if centered:
+            text_rect.midtop = (x, y)
+        else:
+            text_rect.x = x
+            text_rect.y = y
+
         surf.blit(text_surface, text_rect)
 
     @staticmethod

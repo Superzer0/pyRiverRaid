@@ -35,6 +35,9 @@ class ImgResources(ResourcesReader):
     __IMG_SHIELD_CONFIG_KEY = "shieldPowerUp"
     __IMG_FUEL_CONFIG_KEY = "fuelPowerUp"
     __IMG_BOLT_CONFIG_KEY = "boltPowerUp"
+    __IMG_BUTTON_KEY = "buttonImg"
+    __IMG_BUTTON_PRESSED_KEY = "buttonPressedImg"
+    __IMG_PLAYER_LIFE_IMG = "playerLifeImg"
 
     def __init__(self, game_folder, config):
         self.__logger = logging.getLogger(ImgResources.__module__)
@@ -45,8 +48,10 @@ class ImgResources(ResourcesReader):
             self.__bullet_img = self.load_image(ImgResources.__IMG_BULLET_CONFIG_KEY)
             self.__enemy_img = pygame.transform.rotate(self.load_image(ImgResources.__IMG_ENEMY_CONFIG_KEY), 180)
             self.__player_img = self.load_image(ImgResources.__IMG_PLAYER_CONFIG_KEY)
+            self.__button_img = self.load_image(ImgResources.__IMG_BUTTON_KEY)
+            self.__button_pressed_img = self.load_image(ImgResources.__IMG_BUTTON_PRESSED_KEY)
             self.__power_player_img = self.load_image(ImgResources.__IMG_POWER_PLAYER_CONFIG_KEY)
-            self.__player_mini_img = pygame.transform.scale(self.__player_img, (25, 19))
+            self.__player_mini_img = self.load_image(ImgResources.__IMG_PLAYER_LIFE_IMG)
             self.__player_mini_img.set_colorkey(GameColors.BLACK)
             self.__background = self.load_image(ImgResources.__IMG_BACKGROUND_CONFIG_KEY)
             self.__meteors_obstacles = self.__load_meteors_img(
@@ -67,6 +72,14 @@ class ImgResources(ResourcesReader):
     @property
     def player_img(self):
         return self.__player_img
+
+    @property
+    def button_img(self):
+        return self.__button_img
+
+    @property
+    def button_pressed_img(self):
+        return self.__button_pressed_img
 
     @property
     def player_mini_img(self):

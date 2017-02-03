@@ -11,6 +11,7 @@ from objects.powerup_generators import *
 from objects.resources import ImgResources
 from objects.resources.ImgResources import ImgResources
 from objects.screens.base_screen import BaseScreen
+from objects.screens.game_screens import GameScreens
 from objects.spritescontext import SpritesContext
 
 
@@ -51,7 +52,7 @@ class MainGameScreen(BaseScreen):
                                                     GameSettings.WIDTH - 10))
 
         # for i in range(20):
-        #     new_mob()
+        #     self.__new_mob()
 
         for i in range(5):
             self.__new_enemy()
@@ -61,8 +62,7 @@ class MainGameScreen(BaseScreen):
         running = True
         score = 0
         player = self.spriteContext.player
-        quit_reason = BaseScreen.SCREEN_END_REASON_NORMAL
-
+        next_screen = GameScreens.GAME_OVER_SCREEN
         while running:
             # keep loop running at the right speed
             clock.tick(GameSettings.FPS)
@@ -93,11 +93,11 @@ class MainGameScreen(BaseScreen):
                 # check for closing window
                 if event.type == pygame.QUIT:
                     running = False
-                    quit_reason = BaseScreen.SCREEN_END_REASON_QUIT
+                    next_screen = GameScreens.QUIT_GAME
 
         self.__clean_up_screen(screen)
 
-        return {BaseScreen.SCREEN_END_REASON: quit_reason,
+        return {BaseScreen.SCREEN_NEXT: next_screen,
                 LeaderboardEntry.LEVEL: self.__level,
                 LeaderboardEntry.POWER_UPS: self.__power_ups,
                 LeaderboardEntry.HITS: self.__hits,
@@ -115,7 +115,7 @@ class MainGameScreen(BaseScreen):
         self.__draw_hud_bar(screen, GameColors.GREEN, 70, 10, player.shield)
         self.draw_text(screen, self.__localizationContext.main_game_screen.fuel_label, 16, 35, 27)
         self.__draw_hud_bar(screen, GameColors.RED, 70, 31, player.fuel)
-        self.__draw_lives(screen, GameSettings.WIDTH - 100, 5, player.lives,
+        self.__draw_lives(screen, GameSettings.WIDTH - 150, 5, player.lives,
                           self.__resourceContext.imgResources.player_mini_img)
 
     def __player_check_fuel(self, player):
@@ -217,6 +217,7 @@ class MainGameScreen(BaseScreen):
     def __clean_up_screen(self, screen):
         self.all_sprites.empty()
         self.all_sprites.draw(screen)
+        screen.fill(GameColors.BLACK)
         pygame.display.flip()
 
     def __new_mob(self):
@@ -239,7 +240,7 @@ class MainGameScreen(BaseScreen):
     def __draw_lives(self, surf, x, y, lives, player_live_img):
         for live in range(lives):
             img_rect = player_live_img.get_rect()
-            img_rect.x = x + 30 * live
+            img_rect.x = x + 40 * live
             img_rect.y = y
             surf.blit(player_live_img, img_rect)
 
