@@ -1,10 +1,8 @@
 import logging
-from os import path
-
 import pygame
-
 from objects.globals.gamecolors import GameColors
 from objects.resources.ConfigReader import ResourcesReader
+from os import path
 
 
 class ImgResources(ResourcesReader):
@@ -21,6 +19,7 @@ class ImgResources(ResourcesReader):
 
     __IMG_BULLET_CONFIG_KEY = "bulletImg"
     __IMG_ENEMY_CONFIG_KEY = "enemyImg"
+    __IMG_STRAIGHT_ENEMY_CONFIG_KEY = "straightEnemyImg"
     __IMG_PLAYER_CONFIG_KEY = "playerImg"
     __IMG_POWER_PLAYER_CONFIG_KEY = "powerPlayerImg"
     __IMG_BACKGROUND_CONFIG_KEY = "background"
@@ -47,6 +46,8 @@ class ImgResources(ResourcesReader):
                                        self.get_config_property(ImgResources.__IMG_FOLDER_CONFIG_KEY))
             self.__bullet_img = self.load_image(ImgResources.__IMG_BULLET_CONFIG_KEY)
             self.__enemy_img = pygame.transform.rotate(self.load_image(ImgResources.__IMG_ENEMY_CONFIG_KEY), 180)
+            self.__straight_enemy_img = pygame.transform.rotate(
+                self.load_image(ImgResources.__IMG_STRAIGHT_ENEMY_CONFIG_KEY), 180)
             self.__player_img = self.load_image(ImgResources.__IMG_PLAYER_CONFIG_KEY)
             self.__button_img = self.load_image(ImgResources.__IMG_BUTTON_KEY)
             self.__button_pressed_img = self.load_image(ImgResources.__IMG_BUTTON_PRESSED_KEY)
@@ -92,6 +93,10 @@ class ImgResources(ResourcesReader):
     @property
     def enemy_img(self):
         return self.__enemy_img
+
+    @property
+    def straight_enemy_img(self):
+        return self.__straight_enemy_img
 
     @property
     def bullet_img(self):

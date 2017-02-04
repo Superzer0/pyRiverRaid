@@ -1,6 +1,5 @@
 import datetime
 import math
-
 from objects.enemy import Enemy
 from objects.explosion import Explosion
 from objects.leaderboards.leaderboard_entry import LeaderboardEntry
@@ -13,6 +12,7 @@ from objects.resources.ImgResources import ImgResources
 from objects.screens.base_screen import BaseScreen
 from objects.screens.game_screens import GameScreens
 from objects.spritescontext import SpritesContext
+from objects.straight_enemy import StraightEnemy
 
 
 class MainGameScreen(BaseScreen):
@@ -56,6 +56,8 @@ class MainGameScreen(BaseScreen):
 
         for i in range(5):
             self.__new_enemy()
+        for i in range(5):
+            self.__new_straight_enemy()
 
     def run(self, clock, screen, args=None):
         self.__init_screen()
@@ -234,6 +236,12 @@ class MainGameScreen(BaseScreen):
     def __new_enemy(self):
         enemy = Enemy(self.all_sprites, self.spriteContext.enemies, self.spriteContext.enemies_shots,
                       self.__resourceContext.imgResources)
+        self.spriteContext.enemies.add(enemy)
+        self.all_sprites.add(enemy)
+
+    def __new_straight_enemy(self):
+        enemy = StraightEnemy(self.all_sprites, self.spriteContext.enemies, self.spriteContext.enemies_shots,
+                              self.__resourceContext.imgResources)
         self.spriteContext.enemies.add(enemy)
         self.all_sprites.add(enemy)
 
