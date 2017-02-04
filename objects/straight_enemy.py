@@ -36,9 +36,12 @@ class StraightEnemy(pygame.sprite.Sprite):
 
     def setPosition(self):
         self.direction_of_flight = self.getDirection()
-        self.origin_x = random.randrange(0, GameSettings.WIDTH);
-        self.rect.centerx = self.origin_x
-        self.rect.y = random.randrange(200, 400)
+        if self.direction_of_flight == Direction.RIGHT:
+            self.rect.centerx = 50
+        else:
+            self.rect.centerx = GameSettings.WIDTH - 50
+
+        self.rect.y = random.randrange(50, 350)
         self.rotate()
 
     def getDirection(self):

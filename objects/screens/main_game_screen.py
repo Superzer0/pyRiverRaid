@@ -1,6 +1,7 @@
 import datetime
 import math
 from objects.enemy import Enemy
+from objects.enemy_generators import EnemyGenerator
 from objects.explosion import Explosion
 from objects.leaderboards.leaderboard_entry import LeaderboardEntry
 from objects.mobs.randommeteor import RandomMeteor
@@ -32,8 +33,10 @@ class MainGameScreen(BaseScreen):
         bullets = pygame.sprite.Group()
         powerups = pygame.sprite.Group()
         enemies = pygame.sprite.Group()
+        straight_enemies = pygame.sprite.Group()
         enemies_shots = pygame.sprite.Group()
-        self.spriteContext = SpritesContext(mobs, obstacles, bullets, powerups, enemies, enemies_shots)
+        self.spriteContext = SpritesContext(mobs, obstacles, bullets, powerups, enemies, straight_enemies,
+                                            enemies_shots)
         player = Player(self.__resourceContext.imgResources, self.__resourceContext.soundResources, self.all_sprites,
                         bullets, self.spriteContext)
         self.all_sprites.add(player)
@@ -41,6 +44,7 @@ class MainGameScreen(BaseScreen):
 
         self.shieldGenerator = ShieldGenerator(player, self.__resourceContext.imgResources, self.all_sprites, powerups)
         self.fuelGenerator = FuelGenerator(player, self.__resourceContext.imgResources, self.all_sprites, powerups)
+        self.enemyGenerator = EnemyGenerator(self.spriteContext, self.__resourceContext.imgResources, self.all_sprites)
 
         # left obstacles
         for i in range(100):
@@ -54,10 +58,10 @@ class MainGameScreen(BaseScreen):
         # for i in range(20):
         #     self.__new_mob()
 
-        for i in range(5):
-            self.__new_enemy()
-        for i in range(5):
-            self.__new_straight_enemy()
+            # for i in range(5):
+            #     self.__new_enemy()
+            # for i in range(5):
+            #     self.__new_straight_enemy()
 
     def run(self, clock, screen, args=None):
         self.__init_screen()
@@ -81,9 +85,13 @@ class MainGameScreen(BaseScreen):
             running = self.__player_hit_by_mob(player, running)
             running = self.__player_hit_by_obstacle(player, running)
             running = self.__player_hit_enemy(player, running)
+            running = self.__player_hit_straight_enemy(player, running)
             running = self.__enemy_shot_down_player(player, running)
 
             self.fuelGenerator.generate()
+
+            self.enemyGenerator.generateStraightEnemy()
+            self.enemyGenerator.generateEnemy()
 
             # Draw / render
             self.draw_sprites(player, score, screen)
@@ -135,8 +143,17 @@ class MainGameScreen(BaseScreen):
         return player.is_alive()
 
     def __player_shoot_down_enemy(self):
-        hits = pygame.sprite.groupcollide(self.spriteContext.enemies, self.spriteContext.bullets, True,
-                                          pygame.sprite.collide_circle)
+        enemy_hits = pygame.sprite.groupcollide(self.spriteContext.enemies, self.spriteContext.bullets, True,
+                                                pygame.sprite.collide_circle)
+
+        straight_enemy_hits = pygame.sprite.groupcollide(self.spriteContext.straight_enemies,
+                                                         self.spriteContext.bullets, True,
+                                                         pygame.sprite.collide_circle)
+
+        hits = []
+        hits.extend(enemy_hits)
+        hits.extend(straight_enemy_hits)
+
         score_change = 0
         for hit in hits:
             self.spriteContext.playerCanShot = True
@@ -149,8 +166,6 @@ class MainGameScreen(BaseScreen):
             self.__hits += 1
             score_change += int(math.fabs(50 - hit.radius))
             self.shieldGenerator.generate()
-            if len(self.spriteContext.enemies.sprites()) <= GameSettings.MAX_ENEMIES:
-                self.__new_enemy()
         return score_change
 
     def __enemy_shot_down_player(self, player, running):
@@ -169,6 +184,16 @@ class MainGameScreen(BaseScreen):
             hit = hits[0]
             running = self.__player_collide(hit, lambda: self.__new_obstacle(1, hit.rect.x))
             self.__new_enemy()
+
+        return running
+
+    def __player_hit_straight_enemy(self, player, running):
+        hits = pygame.sprite.spritecollide(player, self.spriteContext.straight_enemies, True)
+
+        if hits:
+            hit = hits[0]
+            running = self.__player_collide(hit, lambda: self.__new_obstacle(1, hit.rect.x))
+            self.__new_straight_enemy()
 
         return running
 
@@ -242,7 +267,7 @@ class MainGameScreen(BaseScreen):
     def __new_straight_enemy(self):
         enemy = StraightEnemy(self.all_sprites, self.spriteContext.enemies, self.spriteContext.enemies_shots,
                               self.__resourceContext.imgResources)
-        self.spriteContext.enemies.add(enemy)
+        self.spriteContext.straight_enemies.add(enemy)
         self.all_sprites.add(enemy)
 
     def __draw_lives(self, surf, x, y, lives, player_live_img):
