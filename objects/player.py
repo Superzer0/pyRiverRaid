@@ -1,8 +1,6 @@
 import logging
-import random
-
 import pygame
-
+import random
 from objects.bullet import Bullet
 from objects.globals.gamecolors import GameColors
 from objects.globals.gamesettings import GameSettings
@@ -162,6 +160,7 @@ class Player(pygame.sprite.Sprite):
         self.__lives -= 1
         if self.__lives > 0:
             self.recover_shield()
+            self.recharge_fuel()
 
     def recover_shield(self):
         self.__shield = Player.SHIELD_MAX_VALUE

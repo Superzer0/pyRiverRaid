@@ -55,13 +55,9 @@ class MainGameScreen(BaseScreen):
             self.__new_obstacle(i, random.randrange(GameSettings.WIDTH - GameSettings.WIDTH_OBSTACLES - 50,
                                                     GameSettings.WIDTH - 10))
 
-        # for i in range(20):
-        #     self.__new_mob()
+        for i in range(20):
+            self.__new_mob()
 
-            # for i in range(5):
-            #     self.__new_enemy()
-            # for i in range(5):
-            #     self.__new_straight_enemy()
 
     def run(self, clock, screen, args=None):
         self.__init_screen()
@@ -238,6 +234,7 @@ class MainGameScreen(BaseScreen):
             self.__new_mob()
             score_change += 50 - hit.radius
             self.__hits += 1
+            self.spriteContext.playerCanShot = True
 
         return score_change
 
@@ -304,5 +301,5 @@ class MainGameScreen(BaseScreen):
             self.spriteContext.player.recharge_fuel()
             self.spriteContext.player.hide()
             if not self.spriteContext.player.is_alive() and death_explosion.alive():
-                return True
-        return False
+                return False
+        return True
