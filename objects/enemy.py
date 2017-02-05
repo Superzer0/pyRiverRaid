@@ -1,11 +1,10 @@
 import logging
-import random
-
 import pygame
-
+import random
 from objects.bullet import Bullet
 from objects.globals.gamecolors import GameColors
 from objects.globals.gamesettings import GameSettings
+from objects.my_sprite import MySprite
 
 
 class Direction:
@@ -13,12 +12,12 @@ class Direction:
     RIGHT = 1
 
 
-class Enemy(pygame.sprite.Sprite):
+class Enemy(pygame.sprite.Sprite, MySprite):
     shoot_delay = 750
     area_length = 150
     move_speed = 5
 
-    def __init__(self, all_sprites, enemies, enemies_shots, imgResources):
+    def __init__(self, all_sprites, enemies, enemies_shots, imgResources, speedy=2):
         pygame.sprite.Sprite.__init__(self)
         self.__logger = logging.getLogger(Enemy.__module__)
         self.all_sprites = all_sprites
@@ -34,7 +33,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.centerx = self.origin_x
         self.direction_of_flight = self.getDirection()
         self.rotate()
-        self.__speedy = 2
+        self.__speedy = speedy
+        self.__origin_speedy = speedy
+        self.__twisting_speedy = Enemy.move_speed
         self.radius = 100
         self.__last_shot = pygame.time.get_ticks()
         self.__hidden_time = pygame.time.get_ticks()
@@ -65,9 +66,9 @@ class Enemy(pygame.sprite.Sprite):
 
         # move enemy to left or right
         if self.direction_of_flight == Direction.RIGHT:
-            self.rect.centerx += Enemy.move_speed
+            self.rect.centerx += self.__twisting_speedy
         else:
-            self.rect.centerx -= Enemy.move_speed
+            self.rect.centerx -= self.__twisting_speedy
 
     def rotate(self):
         if self.direction_of_flight == Direction.LEFT:
@@ -77,3 +78,9 @@ class Enemy(pygame.sprite.Sprite):
         else:
             self.direction_of_flight = Direction.LEFT
             self.image = pygame.transform.rotate(self.imgResource.enemy_img, -90)
+
+    def speedUp(self):
+        self.__twisting_speedy = self.move_speed * 2
+
+    def slowDown(self):
+        self.__twisting_speedy = self.move_speed

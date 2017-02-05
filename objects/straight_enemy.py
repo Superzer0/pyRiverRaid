@@ -4,6 +4,7 @@ import random
 from objects.bullet import Bullet
 from objects.globals.gamecolors import GameColors
 from objects.globals.gamesettings import GameSettings
+from objects.my_sprite import MySprite
 
 
 class Direction:
@@ -11,12 +12,12 @@ class Direction:
     RIGHT = 1
 
 
-class StraightEnemy(pygame.sprite.Sprite):
+class StraightEnemy(pygame.sprite.Sprite, MySprite):
     shoot_delay = 750
     area_length = 150
     move_speed = 5
 
-    def __init__(self, all_sprites, enemies, enemies_shots, imgResources):
+    def __init__(self, all_sprites, enemies, enemies_shots, imgResources, speedy=10):
         pygame.sprite.Sprite.__init__(self)
         self.__logger = logging.getLogger(StraightEnemy.__module__)
         self.all_sprites = all_sprites
@@ -28,7 +29,8 @@ class StraightEnemy(pygame.sprite.Sprite):
         self.__bullet_img = imgResources.bullet_img
         self.rect = self.image.get_rect()
         self.setPosition()
-        self.__speedy = 10
+        self.__speedy = speedy
+        self.__origin_speedy = speedy
         self.radius = 100
         self.__last_shot = pygame.time.get_ticks()
         self.__hidden_time = pygame.time.get_ticks()
@@ -62,3 +64,9 @@ class StraightEnemy(pygame.sprite.Sprite):
             self.image = pygame.transform.rotate(self.imgResource.straight_enemy_img, -90)
         else:
             self.image = pygame.transform.rotate(self.imgResource.straight_enemy_img, 90)
+
+    def speedUp(self):
+        self.__speedy = self.__origin_speedy * 2
+
+    def slowDown(self):
+        self.__speedy = self.__origin_speedy

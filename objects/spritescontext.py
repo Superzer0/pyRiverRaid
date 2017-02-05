@@ -12,6 +12,36 @@ class SpritesContext:
         # player's properties
         self.playerCanShot = True
 
+        # game speed's properties
+        self.gameSpeedUp = False
+        self.speedGameHasChanged = False
+
+    def speedUpSprites(self):
+        for bullet in self.bullets:
+            bullet.speedUp()
+
+        for straight_enemy in self.straight_enemies:
+            straight_enemy.speedUp()
+
+        for enemy in self.enemies:
+            enemy.speedUp()
+
+        for powerup in self.powerups:
+            powerup.speedUp()
+
+    def slowDownSprites(self):
+        for bullet in self.bullets:
+            bullet.speedy = bullet.slowDown()
+
+        for straight_enemy in self.straight_enemies:
+            straight_enemy.slowDown()
+
+        for enemy in self.enemies:
+            enemy.slowDown()
+
+        for powerup in self.powerups:
+            powerup.slowDown()
+
     @property
     def player(self):
         return self._player

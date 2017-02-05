@@ -4,6 +4,7 @@ import random
 from objects.bullet import Bullet
 from objects.globals.gamecolors import GameColors
 from objects.globals.gamesettings import GameSettings
+from objects.globals.gamesettings import GameSettings
 from objects.resources.ImgResources import ImgResources
 
 
@@ -82,6 +83,26 @@ class Player(pygame.sprite.Sprite):
             self.__speedx = 8
         if keystate[pygame.K_SPACE]:
                 self.shoot()
+        if keystate[pygame.K_UP]:
+            if not self.context.speedGameHasChanged:
+                # print("ustawiam przyspieszenie!")
+                # self.context.speedUpSprites()
+                self.rect.centery = GameSettings.HEIGHT - 50
+                self.context.gameSpeedUp = True
+                self.context.speedGameHasChanged = True
+
+            self.context.speedUpSprites()
+            self.context.gameSpeedUp = True
+            # print("przyspieszam")
+        else:
+            self.context.gameSpeedUp = False
+
+        if self.context.speedGameHasChanged and not self.context.gameSpeedUp:
+            # print("zwalniam")
+            self.context.slowDownSprites()
+            self.rect.centery = GameSettings.HEIGHT - 30
+            self.context.speedGameHasChanged = False
+            self.context.gameSpeedUp = False
 
         self.rect.x += self.__speedx
         if self.rect.right > GameSettings.WIDTH - GameSettings.WIDTH_OBSTACLES:
