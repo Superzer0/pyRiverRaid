@@ -1,9 +1,10 @@
 import logging
-import pygame
 import random
+
+import pygame
+
 from objects.bullet import Bullet
 from objects.globals.gamecolors import GameColors
-from objects.globals.gamesettings import GameSettings
 from objects.globals.gamesettings import GameSettings
 from objects.resources.ImgResources import ImgResources
 
@@ -41,7 +42,6 @@ class Player(pygame.sprite.Sprite):
         self.image.set_colorkey(GameColors.BLACK)
         self.rect = self.image.get_rect()
         self.radius = 20
-        # pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
         self.rect.centerx = x
         self.rect.bottom = y
 
@@ -91,7 +91,7 @@ class Player(pygame.sprite.Sprite):
                 self.context.gameSpeedUp = True
                 self.context.speedGameHasChanged = True
 
-            self.context.speedUpSprites()
+            self.context.speed_up_sprites()
             self.context.gameSpeedUp = True
             # print("przyspieszam")
         else:
@@ -99,7 +99,7 @@ class Player(pygame.sprite.Sprite):
 
         if self.context.speedGameHasChanged and not self.context.gameSpeedUp:
             # print("zwalniam")
-            self.context.slowDownSprites()
+            self.context.slow_down_sprites()
             self.rect.centery = GameSettings.HEIGHT - 30
             self.context.speedGameHasChanged = False
             self.context.gameSpeedUp = False

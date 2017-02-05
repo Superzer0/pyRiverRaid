@@ -9,7 +9,7 @@ class PowerUpGenerator:
         self.player = player
         self.imgResources = imgResources
         self.all_sprites = all_sprites
-        self.powerups = powerups
+        self.power_ups = powerups
 
     def generate(self):
         pass
@@ -18,28 +18,28 @@ class PowerUpGenerator:
 class ShieldGenerator(PowerUpGenerator):
     # generate random shield
     def generate(self):
-        if self.player.shield < 50 and random.random() > 0.5:
+        if self.player.shield < 50 and random.random() > GameSettings.SHIELD_PROP:
             shield = PowerUp((random.randint(200, GameSettings.WIDTH - 200), 0), self.imgResources.power_ups,
                              self.imgResources.POWER_UP_SHIELD)
-            self.powerups.add(shield)
+            self.power_ups.add(shield)
             self.all_sprites.add(shield)
+
+
+class GunGenerator(PowerUpGenerator):
+    def generate(self):
+        if random.random() > GameSettings.GUN_PROP:
+            gun = PowerUp((random.randint(200, GameSettings.WIDTH - 200), 0), self.imgResources.power_ups,
+                          self.imgResources.POWER_UP_GUN)
+            self.power_ups.add(gun)
+            self.all_sprites.add(gun)
 
 
 class FuelGenerator(PowerUpGenerator):
     # generate random fuel
     def generate(self):
-        count = len(list(filter(lambda x: x.type == self.imgResources.POWER_UP_FUEL, self.powerups)))
-        if count < 2 and self.player.fuel < 80 and random.random() > 0.7:
+        count = len(list(filter(lambda x: x.type == self.imgResources.POWER_UP_FUEL, self.power_ups)))
+        if count < 2 and self.player.fuel < 80 and random.random() > GameSettings.FUEL_PROP:
             fuel = PowerUp((random.randint(200, GameSettings.WIDTH - 200), 0), self.imgResources.power_ups,
                            self.imgResources.POWER_UP_FUEL)
-            self.powerups.add(fuel)
+            self.power_ups.add(fuel)
             self.all_sprites.add(fuel)
-
-            # class GunGenerator(PowerupGenerator):
-            #
-            #     # generate random gun
-            #     def generate(self):
-            #         if random.random() > 0.00000001:
-            #             gun = Powerup((random.randint(200, GameSettings.WIDTH - 200), 0), 'gun', self.context.resource.power_up_images)
-            #             self.context.powerups.add(gun)
-            #             self.context.all_sprites.add(gun)

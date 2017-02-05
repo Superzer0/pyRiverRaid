@@ -1,10 +1,12 @@
 import logging
-import pygame
 import random
+
+import pygame
+
+from objects.base_sprite import BaseShooterSprite
 from objects.bullet import Bullet
 from objects.globals.gamecolors import GameColors
 from objects.globals.gamesettings import GameSettings
-from objects.my_sprite import MySprite
 
 
 class Direction:
@@ -12,13 +14,13 @@ class Direction:
     RIGHT = 1
 
 
-class Enemy(pygame.sprite.Sprite, MySprite):
-    shoot_delay = 750
-    area_length = 150
-    move_speed = 5
+class Enemy(BaseShooterSprite):
+    SHOOT_DELAY = 750
+    AREA_LENGTH = 150
+    MOVE_SPEED = 5
 
     def __init__(self, all_sprites, enemies, enemies_shots, imgResources, speedy=2):
-        pygame.sprite.Sprite.__init__(self)
+        BaseShooterSprite.__init__(self)
         self.__logger = logging.getLogger(Enemy.__module__)
         self.all_sprites = all_sprites
         self.enemies = enemies
@@ -31,17 +33,17 @@ class Enemy(pygame.sprite.Sprite, MySprite):
         self.rect.bottom = random.randrange(0, 10)
         self.origin_x = random.randrange(150, GameSettings.WIDTH - 150);
         self.rect.centerx = self.origin_x
-        self.direction_of_flight = self.getDirection()
+        self.direction_of_flight = self.get_direction()
         self.rotate()
         self.__speedy = speedy
         self.__origin_speedy = speedy
-        self.__twisting_speedy = Enemy.move_speed
+        self.__twisting_speedy = Enemy.MOVE_SPEED
         self.radius = 100
         self.__last_shot = pygame.time.get_ticks()
         self.__hidden_time = pygame.time.get_ticks()
         self.__power_time = pygame.time.get_ticks()
 
-    def getDirection(self):
+    def get_direction(self):
         if 150 < self.origin_x < GameSettings.WIDTH / 2:
             return Direction.LEFT
         if GameSettings.WIDTH / 2 < self.origin_x < GameSettings.WIDTH - 150:
@@ -49,7 +51,7 @@ class Enemy(pygame.sprite.Sprite, MySprite):
 
     def shot(self):
         now = pygame.time.get_ticks()
-        if now - self.__last_shot > Enemy.shoot_delay:
+        if now - self.__last_shot > Enemy.SHOOT_DELAY:
             self.__last_shot = now
             bullet = Bullet(self.rect.centerx, self.rect.bottom, self.__bullet_img, 15)
             self.all_sprites.add(bullet)
@@ -60,7 +62,7 @@ class Enemy(pygame.sprite.Sprite, MySprite):
         # self.shot()
 
         distance = abs(self.origin_x - self.rect.centerx)
-        if distance > Enemy.area_length:
+        if distance > Enemy.AREA_LENGTH:
             # switch direction of flight and rotate enemy's image
             self.rotate()
 
@@ -79,8 +81,8 @@ class Enemy(pygame.sprite.Sprite, MySprite):
             self.direction_of_flight = Direction.LEFT
             self.image = pygame.transform.rotate(self.imgResource.enemy_img, -90)
 
-    def speedUp(self):
-        self.__twisting_speedy = self.move_speed * 2
+    def speed_up(self):
+        self.__speedy = self.__origin_speedy * GameSettings.SPEED_FACTOR
 
-    def slowDown(self):
-        self.__twisting_speedy = self.move_speed
+    def slow_down(self):
+        self.__speedy = self.__origin_speedy

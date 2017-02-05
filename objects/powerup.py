@@ -1,17 +1,15 @@
 import logging
 
-import pygame
-
+from objects.base_sprite import BaseShooterSprite
 from objects.globals.gamecolors import GameColors
 from objects.globals.gamesettings import GameSettings
-from objects.my_sprite import MySprite
 
 
-class PowerUp(pygame.sprite.Sprite, MySprite):
-    def __init__(self, center, images, type, speedy=5):
-        pygame.sprite.Sprite.__init__(self)
+class PowerUp(BaseShooterSprite):
+    def __init__(self, center, images, power_up_type, speedy=5):
+        BaseShooterSprite.__init__(self)
         self.__logger = logging.getLogger(PowerUp.__module__)
-        self.__type = type
+        self.__type = power_up_type
         self.__speedy = speedy
         self.__origin_speedy = speedy
         self.image = images[self.__type]
@@ -29,8 +27,8 @@ class PowerUp(pygame.sprite.Sprite, MySprite):
         if self.rect.top > GameSettings.HEIGHT:
             self.kill()
 
-    def speedUp(self):
-        self.__speedy = self.__origin_speedy * 2
+    def speed_up(self):
+        self.__speedy = self.__origin_speedy * GameSettings.SPEED_FACTOR
 
-    def slowDown(self):
+    def slow_down(self):
         self.__speedy = self.__origin_speedy

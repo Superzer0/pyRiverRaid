@@ -4,7 +4,6 @@ from logging.config import fileConfig
 
 from objects.leaderboards.leaderboard_service import LeaderBoardService
 from objects.player import *
-from objects.powerup_generators import *
 from objects.resources.ImgResources import ImgResources
 from objects.resources.MiscResources import MiscResources
 from objects.resources.ResourcesContext import ResourceContext

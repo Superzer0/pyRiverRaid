@@ -1,15 +1,18 @@
 import abc
 
+import pygame
 
-class MySprite:
+
+class BaseShooterSprite(pygame.sprite.Sprite):
     def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
         self._speedy = None
         self._origin_speedy = None
 
     @abc.abstractmethod
-    def speedUp(self):
+    def speed_up(self):
         pass
 
     @abc.abstractmethod
-    def slowDown(self):
+    def slow_down(self):
         pass

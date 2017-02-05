@@ -1,10 +1,11 @@
 import logging
-import pygame
 import random
-from objects.bullet import Bullet
+
+import pygame
+
+from objects.base_sprite import BaseShooterSprite
 from objects.globals.gamecolors import GameColors
 from objects.globals.gamesettings import GameSettings
-from objects.my_sprite import MySprite
 
 
 class Direction:
@@ -12,13 +13,9 @@ class Direction:
     RIGHT = 1
 
 
-class StraightEnemy(pygame.sprite.Sprite, MySprite):
-    shoot_delay = 750
-    area_length = 150
-    move_speed = 5
-
+class StraightEnemy(BaseShooterSprite):
     def __init__(self, all_sprites, enemies, enemies_shots, imgResources, speedy=10):
-        pygame.sprite.Sprite.__init__(self)
+        BaseShooterSprite.__init__(self)
         self.__logger = logging.getLogger(StraightEnemy.__module__)
         self.all_sprites = all_sprites
         self.enemies = enemies
@@ -28,16 +25,17 @@ class StraightEnemy(pygame.sprite.Sprite, MySprite):
         self.image.set_colorkey(GameColors.BLACK)
         self.__bullet_img = imgResources.bullet_img
         self.rect = self.image.get_rect()
-        self.setPosition()
+        self.set_position()
         self.__speedy = speedy
+        self.__speedx = 15
         self.__origin_speedy = speedy
         self.radius = 100
         self.__last_shot = pygame.time.get_ticks()
         self.__hidden_time = pygame.time.get_ticks()
         self.__power_time = pygame.time.get_ticks()
 
-    def setPosition(self):
-        self.direction_of_flight = self.getDirection()
+    def set_position(self):
+        self.direction_of_flight = self.get_direction()
         if self.direction_of_flight == Direction.RIGHT:
             self.rect.centerx = 50
         else:
@@ -46,16 +44,17 @@ class StraightEnemy(pygame.sprite.Sprite, MySprite):
         self.rect.y = random.randrange(50, 350)
         self.rotate()
 
-    def getDirection(self):
+    @staticmethod
+    def get_direction():
         return random.choice([Direction.LEFT, Direction.RIGHT])
 
     def update(self, *args):
-        if 0 < self.rect.centerx and self.rect.centerx < GameSettings.WIDTH:
-            self.rect.y += 2
+        if 0 < self.rect.centerx < GameSettings.WIDTH:
+            self.rect.y += self.__speedy
             if self.direction_of_flight == Direction.LEFT:
-                self.rect.centerx -= self.__speedy
+                self.rect.centerx -= self.__speedx
             else:
-                self.rect.centerx += self.__speedy
+                self.rect.centerx += self.__speedx
         else:
             self.kill()
 
@@ -65,8 +64,8 @@ class StraightEnemy(pygame.sprite.Sprite, MySprite):
         else:
             self.image = pygame.transform.rotate(self.imgResource.straight_enemy_img, 90)
 
-    def speedUp(self):
-        self.__speedy = self.__origin_speedy * 2
+    def speed_up(self):
+        self.__speedy = self.__origin_speedy * GameSettings.SPEED_FACTOR
 
-    def slowDown(self):
+    def slow_down(self):
         self.__speedy = self.__origin_speedy

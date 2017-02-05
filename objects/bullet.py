@@ -1,15 +1,14 @@
 import logging
 
-import pygame
-
+from objects.base_sprite import BaseShooterSprite
 from objects.globals.gamecolors import GameColors
-from objects.my_sprite import MySprite
+from objects.globals.gamesettings import GameSettings
 
 
-class Bullet(pygame.sprite.Sprite, MySprite):
+class Bullet(BaseShooterSprite):
     def __init__(self, x, y, bullet_img, context, speedy=-30):
         self.__logger = logging.getLogger(Bullet.__module__)
-        pygame.sprite.Sprite.__init__(self)
+        BaseShooterSprite.__init__(self)
         self.image = bullet_img
         self.image.set_colorkey(GameColors.BLACK)
         self.rect = self.image.get_rect()
@@ -26,8 +25,8 @@ class Bullet(pygame.sprite.Sprite, MySprite):
             self.context.playerCanShot = True
             self.kill()
 
-    def speedUp(self):
-        self.__speedy = self.__origin_speedy * 2
+    def speed_up(self):
+        self.__speedy = self.__origin_speedy * GameSettings.SPEED_FACTOR
 
-    def slowDown(self):
+    def slow_down(self):
         self.__speedy = self.__origin_speedy

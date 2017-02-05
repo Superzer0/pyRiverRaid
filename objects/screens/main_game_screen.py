@@ -1,19 +1,19 @@
 import datetime
-import math
-from objects.enemy import Enemy
-from objects.enemy_generators import EnemyGenerator
+
 from objects.explosion import Explosion
 from objects.leaderboards.leaderboard_entry import LeaderboardEntry
+from objects.mobs.enemy import Enemy
+from objects.mobs.generators.enemy_generators import EnemyGenerator
+from objects.mobs.generators.powerup_generators import *
 from objects.mobs.randommeteor import RandomMeteor
 from objects.mobs.rotatingmeteor import RotatingMeteor
+from objects.mobs.straight_enemy import StraightEnemy
 from objects.player import *
-from objects.powerup_generators import *
 from objects.resources import ImgResources
 from objects.resources.ImgResources import ImgResources
 from objects.screens.base_screen import BaseScreen
 from objects.screens.game_screens import GameScreens
 from objects.spritescontext import SpritesContext
-from objects.straight_enemy import StraightEnemy
 
 
 class MainGameScreen(BaseScreen):
@@ -42,22 +42,22 @@ class MainGameScreen(BaseScreen):
         self.all_sprites.add(player)
         self.spriteContext.player = player
 
+        self.gunGenerator = GunGenerator(player, self.__resourceContext.imgResources, self.all_sprites, powerups)
         self.shieldGenerator = ShieldGenerator(player, self.__resourceContext.imgResources, self.all_sprites, powerups)
         self.fuelGenerator = FuelGenerator(player, self.__resourceContext.imgResources, self.all_sprites, powerups)
         self.enemyGenerator = EnemyGenerator(self.spriteContext, self.__resourceContext.imgResources, self.all_sprites)
 
         # left obstacles
-        for i in range(100):
+        for i in range(GameSettings.MAX_OBSTACLES):
             self.__new_obstacle(i, random.randrange(0, GameSettings.WIDTH_OBSTACLES - 50))
 
         # right obstacles
-        for i in range(100):
+        for i in range(GameSettings.MAX_OBSTACLES):
             self.__new_obstacle(i, random.randrange(GameSettings.WIDTH - GameSettings.WIDTH_OBSTACLES - 50,
                                                     GameSettings.WIDTH - 10))
 
-        for i in range(20):
+        for i in range(GameSettings.MAX_METEORS):
             self.__new_mob()
-
 
     def run(self, clock, screen, args=None):
         self.__init_screen()
@@ -86,8 +86,8 @@ class MainGameScreen(BaseScreen):
 
             self.fuelGenerator.generate()
 
-            self.enemyGenerator.generateStraightEnemy()
-            self.enemyGenerator.generateEnemy()
+            self.enemyGenerator.generate_straight_enemy()
+            self.enemyGenerator.generate_enemy()
 
             # Draw / render
             self.draw_sprites(player, score, screen)
@@ -160,8 +160,8 @@ class MainGameScreen(BaseScreen):
             self.all_sprites.add(death_explosion)
             hit.kill()
             self.__hits += 1
-            score_change += int(math.fabs(50 - hit.radius))
-            self.shieldGenerator.generate()
+            score_change += abs(GameSettings.BASE_SCORE_FOR_ENEMY - hit.radius)
+            random.choice([self.shieldGenerator, self.gunGenerator]).generate()
         return score_change
 
     def __enemy_shot_down_player(self, player, running):
@@ -194,7 +194,7 @@ class MainGameScreen(BaseScreen):
         return running
 
     def __player_shoot_down_power_up(self):
-        hits = pygame.sprite.groupcollide(self.spriteContext.powerups, self.spriteContext.bullets, True, True)
+        hits = pygame.sprite.groupcollide(self.spriteContext.power_ups, self.spriteContext.bullets, True, True)
         for hit in hits:
             random.choice(self.__resourceContext.soundResources.explosion_sounds).play()
             explosion = Explosion(hit.rect.center, self.__resourceContext.imgResources.EXPLOSION_ANIMATIONS_SM,
@@ -203,7 +203,7 @@ class MainGameScreen(BaseScreen):
             self.spriteContext.playerCanShot = True
 
     def __player_got_power_up(self, player):
-        hits = pygame.sprite.spritecollide(player, self.spriteContext.powerups, True)
+        hits = pygame.sprite.spritecollide(player, self.spriteContext.power_ups, True)
         for hit in hits:
             player.power_up(hit.type)
             self.__power_ups += 1
@@ -232,7 +232,7 @@ class MainGameScreen(BaseScreen):
             self.all_sprites.add(explosion)
             self.shieldGenerator.generate()
             self.__new_mob()
-            score_change += 50 - hit.radius
+            score_change += GameSettings.BASE_SCORE_FOR_ENEMY - hit.radius
             self.__hits += 1
             self.spriteContext.playerCanShot = True
 
@@ -280,8 +280,8 @@ class MainGameScreen(BaseScreen):
             pct = 0
 
         fill = (pct / 100) * GameSettings.BAR_LENGTH
-        outline_rect = pygame.Rect(x, y, GameSettings.BAR_LENGTH, GameSettings.BAR_HEIGTH)
-        fill_rect = pygame.Rect(x, y, fill, GameSettings.BAR_HEIGTH)
+        outline_rect = pygame.Rect(x, y, GameSettings.BAR_LENGTH, GameSettings.BAR_HEIGHT)
+        fill_rect = pygame.Rect(x, y, fill, GameSettings.BAR_HEIGHT)
         pygame.draw.rect(screen, color, fill_rect)
         pygame.draw.rect(screen, GameColors.WHITE, outline_rect, 2)
 

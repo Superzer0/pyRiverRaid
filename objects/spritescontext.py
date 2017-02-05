@@ -1,13 +1,16 @@
+import itertools
+
+
 class SpritesContext:
-    def __init__(self, mobs, obstacles, bullets, powerups, enemies, straight_enemies, enemies_shots):
-        self._player = None
-        self._mobs = mobs
-        self._obstacles = obstacles
-        self._bullets = bullets
-        self._powerups = powerups
-        self._enemies = enemies
-        self._straight_enemies = straight_enemies
-        self._enemies_shots = enemies_shots
+    def __init__(self, mobs, obstacles, bullets, power_ups, enemies, straight_enemies, enemies_shots):
+        self.__player = None
+        self.__mobs = mobs
+        self.__obstacles = obstacles
+        self.__bullets = bullets
+        self.__power_ups = power_ups
+        self.__enemies = enemies
+        self.__straight_enemies = straight_enemies
+        self.__enemies_shots = enemies_shots
 
         # player's properties
         self.playerCanShot = True
@@ -16,64 +19,51 @@ class SpritesContext:
         self.gameSpeedUp = False
         self.speedGameHasChanged = False
 
-    def speedUpSprites(self):
-        for bullet in self.bullets:
-            bullet.speedUp()
+    def speed_up_sprites(self):
+        for sprite in self.__get_all_sprites():
+            sprite.speed_up()
 
-        for straight_enemy in self.straight_enemies:
-            straight_enemy.speedUp()
+    def slow_down_sprites(self):
+        for sprite in self.__get_all_sprites():
+            sprite.slow_down()
 
-        for enemy in self.enemies:
-            enemy.speedUp()
-
-        for powerup in self.powerups:
-            powerup.speedUp()
-
-    def slowDownSprites(self):
-        for bullet in self.bullets:
-            bullet.speedy = bullet.slowDown()
-
-        for straight_enemy in self.straight_enemies:
-            straight_enemy.slowDown()
-
-        for enemy in self.enemies:
-            enemy.slowDown()
-
-        for powerup in self.powerups:
-            powerup.slowDown()
+    def __get_all_sprites(self):
+        return list(itertools.chain(self.__mobs, self.__obstacles, self.__bullets,
+                                    self.__power_ups, self.__enemies, self.__straight_enemies,
+                                    self.__enemies_shots))
 
     @property
     def player(self):
-        return self._player
+        return self.__player
 
     @property
     def obstacles(self):
-        return self._obstacles
+        return self.__obstacles
 
     @property
     def bullets(self):
-        return self._bullets
+        return self.__bullets
 
     @property
     def mobs(self):
-        return self._mobs
+        return self.__mobs
 
     @property
-    def powerups(self):
-        return self._powerups
+    def power_ups(self):
+        return self.__power_ups
 
     @property
     def enemies_shots(self):
-        return self._enemies_shots
+        return self.__enemies_shots
 
     @property
     def enemies(self):
-        return self._enemies
+        return self.__enemies
 
     @property
     def straight_enemies(self):
-        return self._straight_enemies
+        return self.__straight_enemies
 
     @player.setter
     def player(self, player):
-        self._player = player
+        self.__player = player

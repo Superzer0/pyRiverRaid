@@ -15,10 +15,12 @@ class RandomMeteor(RotatingMeteor):
         self.rotate()
         self.rect.x += self.speedx
         self.rect.y += self.speedy
-        if self.rect.top > GameSettings.HEIGHT + 10 or self.rect.left < -25 or self.rect.right > GameSettings.WIDTH + 20:
+        if self.rect.top > GameSettings.HEIGHT + 10 or self.rect.left < -25 \
+                or self.rect.right > GameSettings.WIDTH + 20:
             self.rect.x = random.randrange(GameSettings.WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
             self.speedy = random.randrange(1, 8)
 
     def is_on_the_border(self):
-        return self.rect.top > GameSettings.HEIGHT + 10 or self.rect.left < -25 or self.rect.right > GameSettings.WIDTH + 20
+        return self.rect.top > GameSettings.HEIGHT + 10 or \
+               self.rect.left < -25 or self.rect.right > GameSettings.WIDTH + 20

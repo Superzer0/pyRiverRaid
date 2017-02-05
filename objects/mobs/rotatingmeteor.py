@@ -2,13 +2,20 @@ import random
 
 import pygame
 
+from objects.base_sprite import BaseShooterSprite
 from objects.globals.gamecolors import GameColors
 from objects.globals.gamesettings import GameSettings
 
 
-class RotatingMeteor(pygame.sprite.Sprite):
+class RotatingMeteor(BaseShooterSprite):
+    def slow_down(self):
+        self.speedy = self.__origin_speedy
+
+    def speed_up(self):
+        self.speedy = self.__origin_speedy * GameSettings.SPEED_FACTOR
+
     def __init__(self, meteor_images, start_x, start_y, speed_x, speed_y, rot_speed):
-        pygame.sprite.Sprite.__init__(self)
+        BaseShooterSprite.__init__(self)
         self.__image_orig = random.choice(meteor_images)
         self.__image_orig.set_colorkey(GameColors.BLACK)
         self.image = self.__image_orig.copy()
@@ -19,6 +26,7 @@ class RotatingMeteor(pygame.sprite.Sprite):
         self.rect.y = start_y
         self.speedx = speed_x
         self.speedy = speed_y
+        self.__origin_speedy = self.speedy
 
         self.rot = 0
         self.rot_speed = rot_speed
@@ -43,4 +51,5 @@ class RotatingMeteor(pygame.sprite.Sprite):
             self.rect.y = random.randrange(-200, -80)
 
     def is_on_the_border(self):
-        return self.rect.top > GameSettings.HEIGHT + 50 or self.rect.left < -50 or self.rect.right > GameSettings.WIDTH + 100
+        return self.rect.top > GameSettings.HEIGHT + 50 \
+               or self.rect.left < -50 or self.rect.right > GameSettings.WIDTH + 100
