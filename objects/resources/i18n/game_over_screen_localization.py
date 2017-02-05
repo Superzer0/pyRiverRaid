@@ -14,6 +14,10 @@ class GameOverLocalization(ConfigReader):
         return self.get_config_property('game_over_summary_score')
 
     @property
+    def bonus_label(self):
+        return self.get_config_property('game_over_bonus_label')
+
+    @property
     def hits_label(self):
         return self.get_config_property('game_over_summary_hits')
 
