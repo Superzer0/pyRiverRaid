@@ -18,6 +18,7 @@ class ImgResources(ResourcesReader):
     __IMG_FOLDER_CONFIG_KEY = "imgFolderName"
 
     __IMG_BULLET_CONFIG_KEY = "bulletImg"
+    __IMG_BRIDGE_CONFIG_KEY = "bridgeImg"
     __IMG_ENEMY_CONFIG_KEY = "enemyImg"
     __IMG_STRAIGHT_ENEMY_CONFIG_KEY = "straightEnemyImg"
     __IMG_PLAYER_CONFIG_KEY = "playerImg"
@@ -45,6 +46,7 @@ class ImgResources(ResourcesReader):
             self.__img_dir = path.join(self.resources_folder,
                                        self.get_config_property(ImgResources.__IMG_FOLDER_CONFIG_KEY))
             self.__bullet_img = self.load_image(ImgResources.__IMG_BULLET_CONFIG_KEY)
+            self.__bridge_img = self.load_image(ImgResources.__IMG_BRIDGE_CONFIG_KEY)
             self.__enemy_img = pygame.transform.rotate(self.load_image(ImgResources.__IMG_ENEMY_CONFIG_KEY), 180)
             self.__straight_enemy_img = pygame.transform.rotate(
                 self.load_image(ImgResources.__IMG_STRAIGHT_ENEMY_CONFIG_KEY), 180)
@@ -97,6 +99,10 @@ class ImgResources(ResourcesReader):
     @property
     def straight_enemy_img(self):
         return self.__straight_enemy_img
+
+    @property
+    def bridge_img(self):
+        return self.__bridge_img
 
     @property
     def bullet_img(self):

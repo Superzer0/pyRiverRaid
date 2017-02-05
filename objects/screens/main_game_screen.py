@@ -1,9 +1,11 @@
 import datetime
-
+from objects.bridge import Bridge
 from objects.explosion import Explosion
+from objects.globals.gamesettings import GameSettings
 from objects.leaderboards.leaderboard_entry import LeaderboardEntry
 from objects.mobs.enemy import Enemy
 from objects.mobs.generators.enemy_generators import EnemyGenerator
+from objects.mobs.generators.mob_generator import MobGenerator
 from objects.mobs.generators.powerup_generators import *
 from objects.mobs.randommeteor import RandomMeteor
 from objects.mobs.rotatingmeteor import RotatingMeteor
@@ -46,6 +48,11 @@ class MainGameScreen(BaseScreen):
         self.shieldGenerator = ShieldGenerator(player, self.__resourceContext.imgResources, self.all_sprites, powerups)
         self.fuelGenerator = FuelGenerator(player, self.__resourceContext.imgResources, self.all_sprites, powerups)
         self.enemyGenerator = EnemyGenerator(self.spriteContext, self.__resourceContext.imgResources, self.all_sprites)
+        self.mobGenerator = MobGenerator(self.spriteContext, self.__resourceContext.imgResources, self.all_sprites)
+
+        self.levels = [GameSettings.LEVEL_1, GameSettings.LEVEL_2, GameSettings.LEVEL_3, GameSettings.LEVEL_4,
+                       GameSettings.LEVEL_5]
+        self.spriteContext.currentLevel = self.levels[0]
 
         # left obstacles
         for i in range(GameSettings.MAX_OBSTACLES):
@@ -56,8 +63,6 @@ class MainGameScreen(BaseScreen):
             self.__new_obstacle(i, random.randrange(GameSettings.WIDTH - GameSettings.WIDTH_OBSTACLES - 50,
                                                     GameSettings.WIDTH - 10))
 
-        for i in range(GameSettings.MAX_METEORS):
-            self.__new_mob()
 
     def run(self, clock, screen, args=None):
         self.__init_screen()
@@ -84,10 +89,20 @@ class MainGameScreen(BaseScreen):
             running = self.__player_hit_straight_enemy(player, running)
             running = self.__enemy_shot_down_player(player, running)
 
-            self.fuelGenerator.generate()
+            if score > self.spriteContext.currentLevel and self.spriteContext.enableSprites:
+                self.spriteContext.enableSprites = False
+                bridge = Bridge(self.spriteContext, self.__resourceContext.imgResources)
+                self.spriteContext.bridge = bridge
+                self.all_sprites.add(bridge)
 
-            self.enemyGenerator.generate_straight_enemy()
-            self.enemyGenerator.generate_enemy()
+            if score > self.spriteContext.currentLevel:
+                running = self.__enemy_shot_down_bridge(running)
+
+            if self.spriteContext.enableSprites:
+                self.fuelGenerator.generate()
+                self.enemyGenerator.generate_straight_enemy()
+                self.enemyGenerator.generate_enemy()
+                self.mobGenerator.generate()
 
             # Draw / render
             self.draw_sprites(player, score, screen)
@@ -217,8 +232,24 @@ class MainGameScreen(BaseScreen):
     def __player_hit_by_mob(self, player, running):
         hits = pygame.sprite.spritecollide(player, self.spriteContext.mobs, True, pygame.sprite.collide_circle)
         for hit in hits:
-            running = self.__player_collide(hit, lambda: self.__new_mob())
+            running = self.__player_collide(hit, lambda: None)
         return running
+
+    def __enemy_shot_down_bridge(self, running):
+        hits = pygame.sprite.spritecollide(self.spriteContext.bridge, self.spriteContext.bullets,
+                                           pygame.sprite.collide_circle)
+        for hit in hits:
+            self.spriteContext.bridge.take_hit();
+            self.spriteContext.playerCanShot = True
+            print("bridge: " + str(self.spriteContext.bridge.shield))
+            if not self.spriteContext.bridge.is_alive():
+                self.spriteContext.bridge = None
+                self.spriteContext.enableSprites = True
+                self.bridgeWasDestroyed = True
+                index = self.levels.index(self.spriteContext.currentLevel)
+                self.spriteContext.currentLevel = self.levels[index + 1]
+        return running
+
 
     def __mob_shot_down(self):
         hits = pygame.sprite.groupcollide(self.spriteContext.mobs, self.spriteContext.bullets, True, True)
@@ -231,7 +262,6 @@ class MainGameScreen(BaseScreen):
 
             self.all_sprites.add(explosion)
             self.shieldGenerator.generate()
-            self.__new_mob()
             score_change += GameSettings.BASE_SCORE_FOR_ENEMY - hit.radius
             self.__hits += 1
             self.spriteContext.playerCanShot = True
@@ -243,11 +273,6 @@ class MainGameScreen(BaseScreen):
         self.all_sprites.draw(screen)
         screen.fill(GameColors.BLACK)
         pygame.display.flip()
-
-    def __new_mob(self):
-        m = RandomMeteor(self.__resourceContext.imgResources.meteor_mobs_img)
-        self.all_sprites.add(m)
-        self.spriteContext.mobs.add(m)
 
     def __new_obstacle(self, i, start_x):
         m = RotatingMeteor(self.__resourceContext.imgResources.meteor_obstacles_img, start_x,

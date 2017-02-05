@@ -1,8 +1,6 @@
 import logging
-import random
-
 import pygame
-
+import random
 from objects.bullet import Bullet
 from objects.globals.gamecolors import GameColors
 from objects.globals.gamesettings import GameSettings
@@ -144,8 +142,8 @@ class Player(pygame.sprite.Sprite):
                     self.__bullets.add(bullet)
                     random.choice(self.__soundResources.shoot_sounds).play()
                 if self.__power >= 2:
-                    bullet1 = Bullet(self.rect.left, self.rect.centery, self.__bullet_img)
-                    bullet2 = Bullet(self.rect.right, self.rect.centery, self.__bullet_img)
+                    bullet1 = Bullet(self.rect.left, self.rect.centery, self.__bullet_img, self.context)
+                    bullet2 = Bullet(self.rect.right, self.rect.centery, self.__bullet_img, self.context)
                     self.__all_sprites.add(bullet1)
                     self.__all_sprites.add(bullet2)
                     self.__bullets.add(bullet1)

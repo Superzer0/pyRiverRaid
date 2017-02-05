@@ -4,6 +4,7 @@ import itertools
 class SpritesContext:
     def __init__(self, mobs, obstacles, bullets, power_ups, enemies, straight_enemies, enemies_shots):
         self.__player = None
+        self.__bridge = None
         self.__mobs = mobs
         self.__obstacles = obstacles
         self.__bullets = bullets
@@ -18,6 +19,10 @@ class SpritesContext:
         # game speed's properties
         self.gameSpeedUp = False
         self.speedGameHasChanged = False
+
+        self.enableSprites = True
+        self.bridgeWasDestroyed = False
+        self.__level = None
 
     def speed_up_sprites(self):
         for sprite in self.__get_all_sprites():
@@ -35,6 +40,14 @@ class SpritesContext:
     @property
     def player(self):
         return self.__player
+
+    @property
+    def bridge(self):
+        return self.__bridge
+
+    @property
+    def level(self):
+        return self.__level
 
     @property
     def obstacles(self):
@@ -67,3 +80,11 @@ class SpritesContext:
     @player.setter
     def player(self, player):
         self.__player = player
+
+    @bridge.setter
+    def bridge(self, bridge):
+        self.__bridge = bridge
+
+    @level.setter
+    def level(self, level):
+        self.__level = level
