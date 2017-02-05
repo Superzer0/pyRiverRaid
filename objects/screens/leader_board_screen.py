@@ -95,7 +95,7 @@ class LeaderBoardScreen(BaseScreen):
             self.draw_text(screen, self.__localizationContext.leader_board_screen.title_label, 64,
                            GameSettings.WIDTH // 2, 20)
 
-            self.draw_text(screen, self.get_header_line(), 20, 100, 120, GameColors.WHITE, False)
+            self.draw_text(screen, self.get_header_line(), 18, 100, 120, GameColors.WHITE, False)
 
             for i, entry in enumerate(leader_board[
                                       LeaderBoardScreen.PAGE_SIZE * page:
@@ -109,20 +109,20 @@ class LeaderBoardScreen(BaseScreen):
 
     def get_data_line(self, i, entry):
         data_str = self.get_adjusted_column(i + 1)
-        data_str += self.get_adjusted_column(entry.player_name)
         data_str += self.get_adjusted_column(entry.level)
         data_str += self.get_adjusted_column(entry.power_ups)
         data_str += self.get_adjusted_column(entry.hits)
         data_str += self.get_adjusted_column(entry.score)
+        data_str += self.get_adjusted_column(entry.player_name)
         return data_str
 
     def get_header_line(self):
-        header_str = self.get_adjusted_column('')
-        header_str += self.get_adjusted_column(self.__localizationContext.leader_board_screen.header_player_label)
+        header_str = self.get_adjusted_column(self.__localizationContext.leader_board_screen.header_lvl_label)
         header_str += self.get_adjusted_column(self.__localizationContext.leader_board_screen.header_lvl_label)
         header_str += self.get_adjusted_column(self.__localizationContext.leader_board_screen.header_power_label)
         header_str += self.get_adjusted_column(self.__localizationContext.leader_board_screen.header_hits_label)
         header_str += self.get_adjusted_column(self.__localizationContext.leader_board_screen.header_score_label)
+        header_str += self.get_adjusted_column(self.__localizationContext.leader_board_screen.header_player_label)
         return header_str
 
     @staticmethod
