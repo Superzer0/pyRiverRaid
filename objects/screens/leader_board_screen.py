@@ -117,7 +117,7 @@ class LeaderBoardScreen(BaseScreen):
         return data_str
 
     def get_header_line(self):
-        header_str = self.get_adjusted_column(self.__localizationContext.leader_board_screen.header_lvl_label)
+        header_str = self.get_adjusted_column(' ')
         header_str += self.get_adjusted_column(self.__localizationContext.leader_board_screen.header_lvl_label)
         header_str += self.get_adjusted_column(self.__localizationContext.leader_board_screen.header_power_label)
         header_str += self.get_adjusted_column(self.__localizationContext.leader_board_screen.header_hits_label)

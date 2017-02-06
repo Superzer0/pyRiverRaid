@@ -1,13 +1,12 @@
 import datetime
+
 from objects.bridge import Bridge
 from objects.explosion import Explosion
-from objects.globals.gamesettings import GameSettings
 from objects.leaderboards.leaderboard_entry import LeaderboardEntry
 from objects.mobs.enemy import Enemy
 from objects.mobs.generators.enemy_generators import EnemyGenerator
 from objects.mobs.generators.mob_generator import MobGenerator
 from objects.mobs.generators.powerup_generators import *
-from objects.mobs.randommeteor import RandomMeteor
 from objects.mobs.rotatingmeteor import RotatingMeteor
 from objects.mobs.straight_enemy import StraightEnemy
 from objects.player import *
@@ -21,9 +20,11 @@ from objects.spritescontext import SpritesContext
 class MainGameScreen(BaseScreen):
     def __init__(self, resourceContext, localizationContext):
         BaseScreen.__init__(self, resourceContext)
+        self.__bridge_was_destroyed = False
         self.__logger = logging.getLogger(MainGameScreen.__module__)
         self.__resourceContext = resourceContext
         self.__localizationContext = localizationContext
+        self.__score = 0
         self.__hits = 0
         self.__power_ups = 0
         self.__level = 1
@@ -33,26 +34,23 @@ class MainGameScreen(BaseScreen):
         mobs = pygame.sprite.Group()
         obstacles = pygame.sprite.Group()
         bullets = pygame.sprite.Group()
-        powerups = pygame.sprite.Group()
+        power_ups = pygame.sprite.Group()
         enemies = pygame.sprite.Group()
         straight_enemies = pygame.sprite.Group()
         enemies_shots = pygame.sprite.Group()
-        self.spriteContext = SpritesContext(mobs, obstacles, bullets, powerups, enemies, straight_enemies,
-                                            enemies_shots)
+        self.sprite_context = SpritesContext(mobs, obstacles, bullets, power_ups, enemies, straight_enemies,
+                                             enemies_shots)
         player = Player(self.__resourceContext.imgResources, self.__resourceContext.soundResources, self.all_sprites,
-                        bullets, self.spriteContext)
+                        bullets, self.sprite_context)
         self.all_sprites.add(player)
-        self.spriteContext.player = player
+        self.sprite_context.player = player
+        self.__bridge_was_destroyed = False
 
-        self.gunGenerator = GunGenerator(player, self.__resourceContext.imgResources, self.all_sprites, powerups)
-        self.shieldGenerator = ShieldGenerator(player, self.__resourceContext.imgResources, self.all_sprites, powerups)
-        self.fuelGenerator = FuelGenerator(player, self.__resourceContext.imgResources, self.all_sprites, powerups)
-        self.enemyGenerator = EnemyGenerator(self.spriteContext, self.__resourceContext.imgResources, self.all_sprites)
-        self.mobGenerator = MobGenerator(self.spriteContext, self.__resourceContext.imgResources, self.all_sprites)
-
-        self.levels = [GameSettings.LEVEL_1, GameSettings.LEVEL_2, GameSettings.LEVEL_3, GameSettings.LEVEL_4,
-                       GameSettings.LEVEL_5]
-        self.spriteContext.currentLevel = self.levels[0]
+        self.gunGenerator = GunGenerator(player, self.__resourceContext.imgResources, self.all_sprites, power_ups)
+        self.shieldGenerator = ShieldGenerator(player, self.__resourceContext.imgResources, self.all_sprites, power_ups)
+        self.fuelGenerator = FuelGenerator(player, self.__resourceContext.imgResources, self.all_sprites, power_ups)
+        self.enemyGenerator = EnemyGenerator(self.sprite_context, self.__resourceContext.imgResources, self.all_sprites)
+        self.mobGenerator = MobGenerator(self.sprite_context, self.__resourceContext.imgResources, self.all_sprites)
 
         # left obstacles
         for i in range(GameSettings.MAX_OBSTACLES):
@@ -63,21 +61,29 @@ class MainGameScreen(BaseScreen):
             self.__new_obstacle(i, random.randrange(GameSettings.WIDTH - GameSettings.WIDTH_OBSTACLES - 50,
                                                     GameSettings.WIDTH - 10))
 
+    def __init_game_state(self, state_args):
+
+        if state_args:
+            self.__level = state_args.get(LeaderboardEntry.LEVEL, 1)
+            self.__power_ups = state_args.get(LeaderboardEntry.POWER_UPS, 0)
+            self.__hits = state_args.get(LeaderboardEntry.HITS, 0)
+            self.__score = state_args.get(LeaderboardEntry.SCORE, 0)
 
     def run(self, clock, screen, args=None):
         self.__init_screen()
-        running = True
-        score = 0
-        player = self.spriteContext.player
+        self.__init_game_state(args)
+        self.sprite_context.set_level_threshold(self.__level)
+        player = self.sprite_context.player
         next_screen = GameScreens.GAME_OVER_SCREEN
-        while running:
+        running = True
+        while running and not self.__bridge_was_destroyed:
             # keep loop running at the right speed
             clock.tick(GameSettings.FPS)
 
             self.all_sprites.update(screen)
 
-            score += self.__mob_shot_down()
-            score += self.__player_shoot_down_enemy()
+            self.__score += self.__mob_shot_down()
+            self.__score += self.__player_shoot_down_enemy()
 
             self.__player_got_power_up(player)
             self.__player_shoot_down_power_up()
@@ -89,23 +95,23 @@ class MainGameScreen(BaseScreen):
             running = self.__player_hit_straight_enemy(player, running)
             running = self.__enemy_shot_down_player(player, running)
 
-            if score > self.spriteContext.currentLevel and self.spriteContext.enableSprites:
-                self.spriteContext.enableSprites = False
-                bridge = Bridge(self.spriteContext, self.__resourceContext.imgResources)
-                self.spriteContext.bridge = bridge
+            if self.__score > self.sprite_context.level_threshold and self.sprite_context.enable_sprites:
+                self.sprite_context.enable_sprites = False
+                bridge = Bridge(self.sprite_context, self.__resourceContext.imgResources)
+                self.sprite_context.bridge = bridge
                 self.all_sprites.add(bridge)
 
-            if score > self.spriteContext.currentLevel:
+            if self.__score > self.sprite_context.level_threshold:
                 running = self.__enemy_shot_down_bridge(running)
 
-            if self.spriteContext.enableSprites:
+            if self.sprite_context.enable_sprites:
                 self.fuelGenerator.generate()
                 self.enemyGenerator.generate_straight_enemy()
                 self.enemyGenerator.generate_enemy()
                 self.mobGenerator.generate()
 
             # Draw / render
-            self.draw_sprites(player, score, screen)
+            self.draw_sprites(player, self.__score, screen)
 
             # *after* drawing everything, flip the display
             pygame.display.flip()
@@ -118,11 +124,15 @@ class MainGameScreen(BaseScreen):
 
         self.__clean_up_screen(screen)
 
+        if self.__bridge_was_destroyed:
+            self.__level_up()
+            next_screen = GameScreens.GAME_SCREEN
+
         return {BaseScreen.SCREEN_NEXT: next_screen,
                 LeaderboardEntry.LEVEL: self.__level,
                 LeaderboardEntry.POWER_UPS: self.__power_ups,
                 LeaderboardEntry.HITS: self.__hits,
-                LeaderboardEntry.SCORE: score,
+                LeaderboardEntry.SCORE: self.__score,
                 LeaderboardEntry.DATE: datetime.datetime.now(),
                 LeaderboardEntry.PLAYER_NAME: 'anonymous player ' + str(random.randint(1, 20))}
 
@@ -142,7 +152,7 @@ class MainGameScreen(BaseScreen):
     def __player_check_fuel(self, player):
         if not player.has_fuel():
             self.__resourceContext.soundResources.player_die_sound.play()
-            death_explosion = Explosion(self.spriteContext.player.rect.center,
+            death_explosion = Explosion(self.sprite_context.player.rect.center,
                                         ImgResources.EXPLOSION_ANIMATIONS_PLAYER,
                                         self.__resourceContext.imgResources.explosion_animations)
             self.all_sprites.add(death_explosion)
@@ -153,12 +163,15 @@ class MainGameScreen(BaseScreen):
 
         return player.is_alive()
 
+    def __level_up(self):
+        self.__level += 1
+
     def __player_shoot_down_enemy(self):
-        enemy_hits = pygame.sprite.groupcollide(self.spriteContext.enemies, self.spriteContext.bullets, True,
+        enemy_hits = pygame.sprite.groupcollide(self.sprite_context.enemies, self.sprite_context.bullets, True,
                                                 pygame.sprite.collide_circle)
 
-        straight_enemy_hits = pygame.sprite.groupcollide(self.spriteContext.straight_enemies,
-                                                         self.spriteContext.bullets, True,
+        straight_enemy_hits = pygame.sprite.groupcollide(self.sprite_context.straight_enemies,
+                                                         self.sprite_context.bullets, True,
                                                          pygame.sprite.collide_circle)
 
         hits = []
@@ -167,7 +180,7 @@ class MainGameScreen(BaseScreen):
 
         score_change = 0
         for hit in hits:
-            self.spriteContext.playerCanShot = True
+            self.sprite_context.playerCanShot = True
             random.choice(self.__resourceContext.soundResources.explosion_sounds).play()
             death_explosion = Explosion(hit.rect.center,
                                         self.__resourceContext.imgResources.EXPLOSION_ANIMATIONS_PLAYER,
@@ -181,7 +194,7 @@ class MainGameScreen(BaseScreen):
 
     def __enemy_shot_down_player(self, player, running):
         # check to see if a enemy's shot hit the player
-        hits = pygame.sprite.spritecollide(player, self.spriteContext.enemies_shots, True,
+        hits = pygame.sprite.spritecollide(player, self.sprite_context.enemies_shots, True,
                                            pygame.sprite.collide_circle)
         for hit in hits:
             running = self.__player_collide(hit, lambda: self.__new_enemy())
@@ -189,7 +202,7 @@ class MainGameScreen(BaseScreen):
         return running
 
     def __player_hit_enemy(self, player, running):
-        hits = pygame.sprite.spritecollide(player, self.spriteContext.enemies, True)
+        hits = pygame.sprite.spritecollide(player, self.sprite_context.enemies, True)
 
         if hits:
             hit = hits[0]
@@ -199,7 +212,7 @@ class MainGameScreen(BaseScreen):
         return running
 
     def __player_hit_straight_enemy(self, player, running):
-        hits = pygame.sprite.spritecollide(player, self.spriteContext.straight_enemies, True)
+        hits = pygame.sprite.spritecollide(player, self.sprite_context.straight_enemies, True)
 
         if hits:
             hit = hits[0]
@@ -209,50 +222,51 @@ class MainGameScreen(BaseScreen):
         return running
 
     def __player_shoot_down_power_up(self):
-        hits = pygame.sprite.groupcollide(self.spriteContext.power_ups, self.spriteContext.bullets, True, True)
+        hits = pygame.sprite.groupcollide(self.sprite_context.power_ups, self.sprite_context.bullets, True, True)
         for hit in hits:
             random.choice(self.__resourceContext.soundResources.explosion_sounds).play()
             explosion = Explosion(hit.rect.center, self.__resourceContext.imgResources.EXPLOSION_ANIMATIONS_SM,
                                   self.__resourceContext.imgResources.explosion_animations)
             self.all_sprites.add(explosion)
-            self.spriteContext.playerCanShot = True
+            self.sprite_context.playerCanShot = True
 
     def __player_got_power_up(self, player):
-        hits = pygame.sprite.spritecollide(player, self.spriteContext.power_ups, True)
+        hits = pygame.sprite.spritecollide(player, self.sprite_context.power_ups, True)
         for hit in hits:
             player.power_up(hit.type)
             self.__power_ups += 1
 
     def __player_hit_by_obstacle(self, player, running):
-        hits = pygame.sprite.spritecollide(player, self.spriteContext.obstacles, True, pygame.sprite.collide_circle)
+        hits = pygame.sprite.spritecollide(player, self.sprite_context.obstacles, True, pygame.sprite.collide_circle)
         for hit in hits:
             running = self.__player_collide(hit, lambda: self.__new_obstacle(1, hit.rect.x))
         return running
 
     def __player_hit_by_mob(self, player, running):
-        hits = pygame.sprite.spritecollide(player, self.spriteContext.mobs, True, pygame.sprite.collide_circle)
+        hits = pygame.sprite.spritecollide(player, self.sprite_context.mobs, True, pygame.sprite.collide_circle)
         for hit in hits:
             running = self.__player_collide(hit, lambda: None)
         return running
 
     def __enemy_shot_down_bridge(self, running):
-        hits = pygame.sprite.spritecollide(self.spriteContext.bridge, self.spriteContext.bullets,
+        hits = pygame.sprite.spritecollide(self.sprite_context.bridge, self.sprite_context.bullets,
                                            pygame.sprite.collide_circle)
         for hit in hits:
-            self.spriteContext.bridge.take_hit();
-            self.spriteContext.playerCanShot = True
-            print("bridge: " + str(self.spriteContext.bridge.shield))
-            if not self.spriteContext.bridge.is_alive():
-                self.spriteContext.bridge = None
-                self.spriteContext.enableSprites = True
-                self.bridgeWasDestroyed = True
-                index = self.levels.index(self.spriteContext.currentLevel)
-                self.spriteContext.currentLevel = self.levels[index + 1]
+            if self.sprite_context.bridge:
+                self.sprite_context.bridge.take_hit()
+                self.sprite_context.playerCanShot = True
+                random.choice(self.__resourceContext.soundResources.explosion_sounds).play()
+                explosion = Explosion(hit.rect.center, self.__resourceContext.imgResources.EXPLOSION_ANIMATIONS_LG,
+                                      self.__resourceContext.imgResources.explosion_animations)
+                self.all_sprites.add(explosion)
+                if not self.sprite_context.bridge.is_alive():
+                    self.sprite_context.bridge = None
+                    self.sprite_context.enable_sprites = True
+                    self.__bridge_was_destroyed = True
         return running
 
-
     def __mob_shot_down(self):
-        hits = pygame.sprite.groupcollide(self.spriteContext.mobs, self.spriteContext.bullets, True, True)
+        hits = pygame.sprite.groupcollide(self.sprite_context.mobs, self.sprite_context.bullets, True, True)
         score_change = 0
         for hit in hits:
             random.choice(self.__resourceContext.soundResources.explosion_sounds).play()
@@ -264,7 +278,7 @@ class MainGameScreen(BaseScreen):
             self.shieldGenerator.generate()
             score_change += GameSettings.BASE_SCORE_FOR_ENEMY - hit.radius
             self.__hits += 1
-            self.spriteContext.playerCanShot = True
+            self.sprite_context.playerCanShot = True
 
         return score_change
 
@@ -278,28 +292,30 @@ class MainGameScreen(BaseScreen):
         m = RotatingMeteor(self.__resourceContext.imgResources.meteor_obstacles_img, start_x,
                            random.randrange(-300, (15 * i)), 0, random.randrange(1, 2), random.randrange(-2, 2))
         self.all_sprites.add(m)
-        self.spriteContext.obstacles.add(m)
+        self.sprite_context.obstacles.add(m)
 
     def __new_enemy(self):
-        enemy = Enemy(self.all_sprites, self.spriteContext.enemies, self.spriteContext.enemies_shots,
+        enemy = Enemy(self.all_sprites, self.sprite_context.enemies, self.sprite_context.enemies_shots,
                       self.__resourceContext.imgResources)
-        self.spriteContext.enemies.add(enemy)
+        self.sprite_context.enemies.add(enemy)
         self.all_sprites.add(enemy)
 
     def __new_straight_enemy(self):
-        enemy = StraightEnemy(self.all_sprites, self.spriteContext.enemies, self.spriteContext.enemies_shots,
+        enemy = StraightEnemy(self.all_sprites, self.sprite_context.enemies, self.sprite_context.enemies_shots,
                               self.__resourceContext.imgResources)
-        self.spriteContext.straight_enemies.add(enemy)
+        self.sprite_context.straight_enemies.add(enemy)
         self.all_sprites.add(enemy)
 
-    def __draw_lives(self, surf, x, y, lives, player_live_img):
+    @staticmethod
+    def __draw_lives(surf, x, y, lives, player_live_img):
         for live in range(lives):
             img_rect = player_live_img.get_rect()
             img_rect.x = x + 40 * live
             img_rect.y = y
             surf.blit(player_live_img, img_rect)
 
-    def __draw_hud_bar(self, screen, color, x, y, pct):
+    @staticmethod
+    def __draw_hud_bar(screen, color, x, y, pct):
 
         if pct < 0:
             pct = 0
@@ -311,7 +327,7 @@ class MainGameScreen(BaseScreen):
         pygame.draw.rect(screen, GameColors.WHITE, outline_rect, 2)
 
     def __player_collide(self, hit, new_object_fun):
-        is_terminal_hit = self.spriteContext.player.was_hit(hit.radius * 2)
+        is_terminal_hit = self.sprite_context.player.was_hit(hit.radius * 2)
         new_object_fun()
         player_explosion = Explosion(hit.rect.center, ImgResources.EXPLOSION_ANIMATIONS_SM,
                                      self.__resourceContext.imgResources.explosion_animations)
@@ -320,11 +336,12 @@ class MainGameScreen(BaseScreen):
         if is_terminal_hit:
             self.__logger.debug("player terminated by:" + str(hit))
             self.__resourceContext.soundResources.player_die_sound.play()
-            death_explosion = Explosion(self.spriteContext.player.rect.center, ImgResources.EXPLOSION_ANIMATIONS_PLAYER,
+            death_explosion = Explosion(self.sprite_context.player.rect.center,
+                                        ImgResources.EXPLOSION_ANIMATIONS_PLAYER,
                                         self.__resourceContext.imgResources.explosion_animations)
             self.all_sprites.add(death_explosion)
-            self.spriteContext.player.recharge_fuel()
-            self.spriteContext.player.hide()
-            if not self.spriteContext.player.is_alive() and death_explosion.alive():
+            self.sprite_context.player.recharge_fuel()
+            self.sprite_context.player.hide()
+            if not self.sprite_context.player.is_alive() and death_explosion.alive():
                 return False
         return True

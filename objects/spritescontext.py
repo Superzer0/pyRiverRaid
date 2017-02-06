@@ -1,5 +1,7 @@
 import itertools
 
+from objects.globals.gamesettings import GameSettings
+
 
 class SpritesContext:
     def __init__(self, mobs, obstacles, bullets, power_ups, enemies, straight_enemies, enemies_shots):
@@ -20,9 +22,12 @@ class SpritesContext:
         self.gameSpeedUp = False
         self.speedGameHasChanged = False
 
-        self.enableSprites = True
+        self.enable_sprites = True
         self.bridgeWasDestroyed = False
-        self.__level = None
+        self.__level_threshold = GameSettings.LEVEL_INITIAL_THRESHOLD
+
+    def set_level_threshold(self, level):
+        self.__level_threshold = level * GameSettings.LEVEL_INITIAL_THRESHOLD
 
     def speed_up_sprites(self):
         for sprite in self.__get_all_sprites():
@@ -46,8 +51,8 @@ class SpritesContext:
         return self.__bridge
 
     @property
-    def level(self):
-        return self.__level
+    def level_threshold(self):
+        return self.__level_threshold
 
     @property
     def obstacles(self):
@@ -85,6 +90,6 @@ class SpritesContext:
     def bridge(self, bridge):
         self.__bridge = bridge
 
-    @level.setter
-    def level(self, level):
-        self.__level = level
+    @level_threshold.setter
+    def level_threshold(self, level):
+        self.__level_threshold = level

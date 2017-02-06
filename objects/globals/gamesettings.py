@@ -15,8 +15,4 @@ class GameSettings:
     SHIELD_PROP = 0.5
     FUEL_PROP = 0.7
     GUN_PROP = 0.7
-    LEVEL_1 = 1000
-    LEVEL_2 = 3000
-    LEVEL_3 = 7000
-    LEVEL_4 = 10000
-    LEVEL_5 = 15000
+    LEVEL_INITIAL_THRESHOLD = 1500
