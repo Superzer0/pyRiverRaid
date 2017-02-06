@@ -12,6 +12,7 @@ from other.py_text_input import TextInput
 
 
 class GameOverScreen(BaseScreen):
+    """Game over screen"""
     def __init__(self, resourceContext, localizationContext, leaderBoardService):
         BaseScreen.__init__(self, resourceContext)
         self.__leaderBoardService = leaderBoardService

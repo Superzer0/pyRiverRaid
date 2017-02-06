@@ -4,6 +4,7 @@ import pygame
 
 
 class Explosion(pygame.sprite.Sprite):
+    """Sprite responsible for explosion animation"""
     def __init__(self, center, size, explosion_anim):
         pygame.sprite.Sprite.__init__(self)
         self.__logger = logging.getLogger(Explosion.__module__)

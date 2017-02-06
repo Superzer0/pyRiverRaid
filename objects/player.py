@@ -1,6 +1,8 @@
 import logging
-import pygame
 import random
+
+import pygame
+
 from objects.bullet import Bullet
 from objects.globals.gamecolors import GameColors
 from objects.globals.gamesettings import GameSettings
@@ -83,20 +85,16 @@ class Player(pygame.sprite.Sprite):
                 self.shoot()
         if keystate[pygame.K_UP]:
             if not self.context.speedGameHasChanged:
-                # print("ustawiam przyspieszenie!")
-                # self.context.speedUpSprites()
                 self.rect.centery = GameSettings.HEIGHT - 50
                 self.context.gameSpeedUp = True
                 self.context.speedGameHasChanged = True
 
             self.context.speed_up_sprites()
             self.context.gameSpeedUp = True
-            # print("przyspieszam")
         else:
             self.context.gameSpeedUp = False
 
         if self.context.speedGameHasChanged and not self.context.gameSpeedUp:
-            # print("zwalniam")
             self.context.slow_down_sprites()
             self.rect.centery = GameSettings.HEIGHT - 30
             self.context.speedGameHasChanged = False
@@ -129,6 +127,7 @@ class Player(pygame.sprite.Sprite):
             self.set_player_img(self.__player_power_up_img, self.rect.centerx, self.rect.bottom)
 
     def shoot(self):
+        """Allows player to shoot down the enemy. Issues one bullet and adds it to underlying sprite context."""
         if self.__hidden:
             return
 
@@ -170,16 +169,20 @@ class Player(pygame.sprite.Sprite):
         return self.__lives > 0
 
     def recharge_fuel(self):
+        """Fills fuel to max value"""
         self.__fuel = Player.FUEL_MAX_VALUE
 
     def has_fuel(self):
+        """Returns true/false if player has gas"""
         return self.__fuel > 0
 
     def fuel_is_empty(self):
+        """Triggers actions for fuel empty. Player loses live"""
         self.__lives -= 1
         if self.__lives > 0:
             self.recover_shield()
             self.recharge_fuel()
 
     def recover_shield(self):
+        """Fills shield to max value"""
         self.__shield = Player.SHIELD_MAX_VALUE

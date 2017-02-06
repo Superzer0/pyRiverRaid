@@ -6,11 +6,7 @@ import pygame
 from objects.base_sprite import BaseShooterSprite
 from objects.globals.gamecolors import GameColors
 from objects.globals.gamesettings import GameSettings
-
-
-class Direction:
-    LEFT = -1
-    RIGHT = 1
+from objects.mobs.enemy import EnemyMoveDirection
 
 
 class StraightEnemy(BaseShooterSprite):
@@ -36,36 +32,38 @@ class StraightEnemy(BaseShooterSprite):
 
     def set_position(self):
         self.direction_of_flight = self.get_direction()
-        if self.direction_of_flight == Direction.RIGHT:
+        if self.direction_of_flight == EnemyMoveDirection.RIGHT:
             self.rect.centerx = 50
         else:
             self.rect.centerx = GameSettings.WIDTH - 50
 
         self.rect.y = random.randrange(50, 350)
-        self.rotate()
+        self.__rotate()
 
     @staticmethod
     def get_direction():
-        return random.choice([Direction.LEFT, Direction.RIGHT])
+        return random.choice([EnemyMoveDirection.LEFT, EnemyMoveDirection.RIGHT])
 
     def update(self, *args):
         if 0 < self.rect.centerx < GameSettings.WIDTH:
             self.rect.y += self.__speedy
-            if self.direction_of_flight == Direction.LEFT:
+            if self.direction_of_flight == EnemyMoveDirection.LEFT:
                 self.rect.centerx -= self.__speedx
             else:
                 self.rect.centerx += self.__speedx
         else:
             self.kill()
 
-    def rotate(self):
-        if self.direction_of_flight == Direction.LEFT:
+    def __rotate(self):
+        if self.direction_of_flight == EnemyMoveDirection.LEFT:
             self.image = pygame.transform.rotate(self.imgResource.straight_enemy_img, -90)
         else:
             self.image = pygame.transform.rotate(self.imgResource.straight_enemy_img, 90)
 
     def speed_up(self):
+        """Causes increase in Y speed of the sprite by GameSettings.SPEED_FACTOR"""
         self.__speedy = self.__origin_speedy * GameSettings.SPEED_FACTOR
 
     def slow_down(self):
+        """Causes decrease in Y speed of the sprite."""
         self.__speedy = self.__origin_speedy

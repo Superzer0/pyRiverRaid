@@ -2,10 +2,14 @@ from os import path
 
 
 class ConfigReader:
+    """Base class for configuration reading. Uses standard python configReader."""
     __CONFIG_LIST_SEPARATOR = ','
     DEFAULT_SECTION = "DEFAULT"
 
     def __init__(self, config, section_name=None, strip_properties=False):
+        """Initializes instalce of Config Reader that wraps python configReader
+        If no section_name is provided then default section is used
+        """
         self.__config = config
         self.__section_name = section_name
         self.__strip_properties = strip_properties
@@ -13,15 +17,26 @@ class ConfigReader:
             self.__section_name = ConfigReader.DEFAULT_SECTION
 
     def get_config_property(self, property_name):
-        return self.strip_property(self.__config[self.__section_name][property_name])
+        """Gets property from underlying configReader.
+
+        Performs stripping if needed
+        :param property_name: property name in *.ini file
+        :return: string with value for the property
+        """
+        return self.__strip_property(self.__config[self.__section_name][property_name])
 
     def get_config_property_value_list(self, property_name):
+        """Gets list for the given property_name.
+
+        :param property_name: property name in *.ini file
+        :return: Stripped list of values separated by __CONFIG_LIST_SEPARATOR
+        """
         value = self.get_config_property(property_name)
         if not value:
             raise IndexError('Error when reading configuration file')
-        return [self.strip_property(x) for x in value.split(ConfigReader.__CONFIG_LIST_SEPARATOR)]
+        return [self.__strip_property(x) for x in value.split(ConfigReader.__CONFIG_LIST_SEPARATOR)]
 
-    def strip_property(self, txt):
+    def __strip_property(self, txt):
         return txt.strip() if self.__strip_properties else txt
 
 

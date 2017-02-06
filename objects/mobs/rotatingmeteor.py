@@ -8,12 +8,7 @@ from objects.globals.gamesettings import GameSettings
 
 
 class RotatingMeteor(BaseShooterSprite):
-    def slow_down(self):
-        self.speedy = self.__origin_speedy
-
-    def speed_up(self):
-        self.speedy = self.__origin_speedy * GameSettings.SPEED_FACTOR
-
+    """Base class for meteors. Coordinates and speed values can be set custom values."""
     def __init__(self, meteor_images, start_x, start_y, speed_x, speed_y, rot_speed):
         BaseShooterSprite.__init__(self)
         self.__image_orig = random.choice(meteor_images)
@@ -33,6 +28,7 @@ class RotatingMeteor(BaseShooterSprite):
         self.last_update = pygame.time.get_ticks()
 
     def rotate(self):
+        """Rotates the underlying sprite image"""
         now = pygame.time.get_ticks()
         if now - self.last_update > 50:
             self.last_update = now
@@ -44,12 +40,22 @@ class RotatingMeteor(BaseShooterSprite):
             self.rect.center = old_center
 
     def update(self, *args):
+        """Updates state for the meteor on frame basis"""
         self.rotate()
         self.rect.x += self.speedx
         self.rect.y += self.speedy
         if self.is_on_the_border():
             self.rect.y = random.randrange(-200, -80)
 
+    def slow_down(self):
+        """Causes decrease in Y speed of the sprite."""
+        self.speedy = self.__origin_speedy
+
+    def speed_up(self):
+        """Causes increase in Y speed of the sprite by GameSettings.SPEED_FACTOR"""
+        self.speedy = self.__origin_speedy * GameSettings.SPEED_FACTOR
+
     def is_on_the_border(self):
+        """Determines if sprite is on the edge of user screen"""
         return self.rect.top > GameSettings.HEIGHT + 50 \
                or self.rect.left < -50 or self.rect.right > GameSettings.WIDTH + 100

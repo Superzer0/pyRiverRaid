@@ -1,4 +1,5 @@
 class GameSettings:
+    """Defines common game settings."""
     WIDTH = 1200
     HEIGHT = 640
     FPS = 30

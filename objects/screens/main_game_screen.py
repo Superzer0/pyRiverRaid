@@ -18,6 +18,7 @@ from objects.spritescontext import SpritesContext
 
 
 class MainGameScreen(BaseScreen):
+    """Main game screen."""
     def __init__(self, resourceContext, localizationContext):
         BaseScreen.__init__(self, resourceContext)
         self.__bridge_was_destroyed = False

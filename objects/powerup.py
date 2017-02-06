@@ -28,7 +28,9 @@ class PowerUp(BaseShooterSprite):
             self.kill()
 
     def speed_up(self):
+        """Causes increase in Y speed of the sprite by GameSettings.SPEED_FACTOR"""
         self.__speedy = self.__origin_speedy * GameSettings.SPEED_FACTOR
 
     def slow_down(self):
+        """Causes decrease in Y speed of the sprite."""
         self.__speedy = self.__origin_speedy

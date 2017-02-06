@@ -10,7 +10,7 @@ from objects.ui.button import Button
 
 
 class GameMenuScreen(BaseScreen):
-
+    """Game menu screen"""
     def __init__(self, resourceContext, localizationContext):
         BaseScreen.__init__(self, resourceContext)
         self.__logger = logging.getLogger(GameMenuScreen.__module__)

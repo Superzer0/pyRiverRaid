@@ -10,6 +10,7 @@ from objects.ui.button import Button
 
 
 class LeaderBoardScreen(BaseScreen):
+    """Leader board screen"""
     COLUMN_WIDTH = 20
     PAGE_SIZE = 10
 
@@ -97,11 +98,10 @@ class LeaderBoardScreen(BaseScreen):
 
             self.draw_text(screen, self.get_header_line(), 18, 100, 120, GameColors.WHITE, False)
 
-            for i, entry in enumerate(leader_board[
-                                      LeaderBoardScreen.PAGE_SIZE * page:
-                                                      LeaderBoardScreen.PAGE_SIZE * page + LeaderBoardScreen.PAGE_SIZE]):
-                self.draw_text(screen, self.get_data_line(i + LeaderBoardScreen.PAGE_SIZE * page, entry), 18, 100, 180
-                               + i * 20, GameColors.WHITE, False)
+            for i, entry in enumerate(leader_board[LeaderBoardScreen.PAGE_SIZE * page:
+                            LeaderBoardScreen.PAGE_SIZE * page + LeaderBoardScreen.PAGE_SIZE]):
+                self.draw_text(screen, self.get_data_line(i + LeaderBoardScreen.PAGE_SIZE * page, entry), 18, 100,
+                               180 + i * 20, GameColors.WHITE, False)
 
             pygame.display.flip()
 

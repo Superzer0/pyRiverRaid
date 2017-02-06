@@ -6,6 +6,7 @@ from objects.globals.gamecolors import GameColors
 
 
 class Button(pygame.sprite.Sprite):
+    """Basic UI element in user interface. Sprite based."""
     def __init__(self, x, y, resourcesContext, text, id, has_focus=False):
         pygame.sprite.Sprite.__init__(self)
         self.__id = id
@@ -25,12 +26,13 @@ class Button(pygame.sprite.Sprite):
         return self.__id
 
     def set_button_image(self, x, y):
+        """Sets button text centered image."""
         self.image = self.__get_button_image()
         self.image.set_colorkey(GameColors.BLACK)
         self.rect = self.image.get_rect()
         self.rect.bottom = y
         self.rect.centerx = x
-        self.draw_text(self.image, self.__text, 20, (self.rect.width // 2, self.rect.height * 0.25), GameColors.BLACK)
+        self.__draw_text(self.image, self.__text, 20, (self.rect.width // 2, self.rect.height * 0.25), GameColors.BLACK)
 
     def focus(self, value=True):
         self.has_focus = value
@@ -41,7 +43,7 @@ class Button(pygame.sprite.Sprite):
     def __get_button_image(self):
         return (self.button_pressed_img if self.has_focus else self.button_img).copy()
 
-    def draw_text(self, surf, text, size, position, color=GameColors.WHITE):
+    def __draw_text(self, surf, text, size, position, color=GameColors.WHITE):
         font = self.__resourceContext.miscResources.get_font(size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()

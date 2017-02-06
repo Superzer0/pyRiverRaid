@@ -1,4 +1,6 @@
 class GameColors:
+    """Defined common colours used in the game"""
+
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)

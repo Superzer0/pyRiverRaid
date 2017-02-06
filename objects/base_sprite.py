@@ -11,8 +11,10 @@ class BaseShooterSprite(pygame.sprite.Sprite):
 
     @abc.abstractmethod
     def speed_up(self):
+        """Base method implemented in derived classes"""
         pass
 
     @abc.abstractmethod
     def slow_down(self):
+        """Base method implemented in derived classes"""
         pass
