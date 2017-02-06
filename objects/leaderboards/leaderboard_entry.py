@@ -10,6 +10,8 @@ class LeaderboardEntry:
     DATE = "DATE"
 
     def __init__(self, row):
+        if not row:
+            raise TypeError('Value should be dictionary like, non empty object.')
         self.__row = row
 
     @property

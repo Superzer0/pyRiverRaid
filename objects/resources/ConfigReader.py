@@ -5,7 +5,7 @@ class ConfigReader:
     __CONFIG_LIST_SEPARATOR = ','
     DEFAULT_SECTION = "DEFAULT"
 
-    def __init__(self, config, section_name, strip_properties=False):
+    def __init__(self, config, section_name=None, strip_properties=False):
         self.__config = config
         self.__section_name = section_name
         self.__strip_properties = strip_properties
